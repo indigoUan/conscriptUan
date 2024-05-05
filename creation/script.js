@@ -58,12 +58,18 @@ function render() {
 	drawCurves(canvas, ctx);
 }
 
-document.getElementById('gridCheckbox').addEventListener('change', function() {
+{
+	const canvas = document.getElementById("myCanvas");
+	const ctx = canvas.getContext("2d");
+	ctx.lineCap = "round";
+}
+
+document.getElementById("gridCheckbox").addEventListener("change", function() {
     showGrid = this.checked;
-    console.log('showGrid:', showGrid);
+    console.log("showGrid:", showGrid);
 });
 
-document.addEventListener('keydown', function(event) {
+document.addEventListener("keydown", function(event) {
 	if(event.key === " ") {
 		for (let i = 0; i < curves.length; i++) {
 			curves[i].deactivate();

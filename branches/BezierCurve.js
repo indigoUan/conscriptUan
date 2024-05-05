@@ -81,7 +81,7 @@ class BezierCurve {
 		const stepY = rect.width / (window.gridResolution - 1);
 
 		const result = {
-			x: Math.round(parseFloat(point.left) / stepX) * stepX,
+			x: Math.round((parseFloat(point.left) / stepX) - 0.5) * stepX,
 			y: (Math.round(parseFloat(point.top) / stepY) - 1) * stepY
 		}
 
@@ -196,8 +196,7 @@ class BezierCurve {
 	}
 
 	getGriddedPoints() {
-		let result = new Array(5);
-		result[0] = this.thickness;
+		let result = new Array(4);
 
 		const rect = document.getElementById("myCanvas").getBoundingClientRect();
 		const stepX = rect.width / (window.gridResolution - 1);
@@ -211,9 +210,24 @@ class BezierCurve {
 				y: (Math.round(parseFloat(point.top) / stepY) - 1)
 			}
 
-			result[i + 1] = [ snapped.x, snapped.y ];
+			result[i] = [ snapped.x, snapped.y ];
 		}
 
 		return result;
+	}
+
+	setGriddedPoints(origin, controlPoint1, controlPoint2, end) {
+		const rect = document.getElementById("myCanvas").getBoundingClientRect();
+		const stepX = rect.width / (window.gridResolution - 1);
+		const stepY = rect.width / (window.gridResolution - 1);
+
+		const points = [ origin, controlPoint1, controlPoint2, end ];
+
+		for (let i = 0; i < 4; i++) {
+			const dot = document.getElementsByClassName(`dot${this.dotsId}`)[i];
+
+			dot.style.left = `${stepX * points[i][0] - 8 + rect.left}px`;
+			dot.style.top = `${stepY * points[i][1] - 8 + rect.top}px`;
+		}
 	}
 }

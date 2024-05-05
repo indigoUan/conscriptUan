@@ -1,6 +1,6 @@
 class BezierCurve {
 	constructor(dotsId, activeColor) {
-		this.thickness = 4;
+		this.thickness = 12;
 		this.dotsId = dotsId;
 		this.activeColor = activeColor;
 
@@ -13,16 +13,22 @@ class BezierCurve {
 			border-radius: 50%;
 			position: absolute;
 			cursor: move;
+
+			-webkit-user-select: none;  /* Chrome, Safari, Opera */
+			-khtml-user-select: none;   /* Konqueror */
+			-moz-user-select: none;     /* Firefox */
+			-ms-user-select: none;      /* Internet Explorer/Edge */
+			user-select: none;          /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
 		}
 		`;
 		document.head.appendChild(style);
 		this.deactivate();
-		
+
 		for (let i = 0; i < 4; i++) {
 			let dot = document.createElement('div');
 			dot.id = `dot${i}_${dotsId}`;
 			dot.className = `dot${dotsId}`;
-		
+
 			document.body.appendChild(dot);
 		}
 
@@ -31,30 +37,42 @@ class BezierCurve {
 		for (let i = 0; i < dots.length; i++) {
 			let canvas = document.getElementById("myCanvas");
 			let rect = canvas.getBoundingClientRect();
-		
-			let initialX = rect.left + canvas.width / (dots.length - 1) * i - 8; // tried using style.width * 0.5, but idk why it wouldn't work, so we hardcode it 😎 
-			let initialY = rect.top + canvas.height / (dots.length - 1) * i - 8; // tried using style.height * 0.5, but idk why it wouldn't work, so we hardcode it 😎 
-		
+
+			let initialX = 0;
+			let initialY = 0;
+
+			if (i == 0) {
+			} else if (i == 1) {
+				initialY = canvas.height;
+			} else if (i == 2) {
+				initialX = canvas.width;
+			} else if (i == 3) {
+				initialX = canvas.width;
+				initialY = canvas.height;
+			}
+
 			dots[i].style.top = `${initialX}px`;
 			dots[i].style.left = `${initialY}px`;
-		
-			dots[i].addEventListener('mousedown', function(e) {
-				let offsetX = e.clientX - parseInt(window.getComputedStyle(this).left);
-				let offsetY = e.clientY - parseInt(window.getComputedStyle(this).top);
-		
-				function mouseMoveHandler(e) {
-					dots[i].style.top = `${e.clientY - offsetY}px`;
-					dots[i].style.left = `${e.clientX - offsetX}px`;
-				}
-		
-				function reset() {
-					document.removeEventListener('mousemove', mouseMoveHandler);
-					document.removeEventListener('mouseup', reset);
-				}
-		
-				document.addEventListener('mousemove', mouseMoveHandler);
-				document.addEventListener('mouseup', reset);
-			});
+		}
+	}
+
+	makeMouseDownHandler(dot) {
+		return function(e) {
+			let offsetX = e.clientX - parseInt(window.getComputedStyle(this).left);
+			let offsetY = e.clientY - parseInt(window.getComputedStyle(this).top);
+
+			function mouseMoveHandler(e) {
+				dot.style.top = `${e.clientY - offsetY}px`;
+				dot.style.left = `${e.clientX - offsetX}px`;
+			}
+
+			function reset() {
+				document.removeEventListener("mousemove", mouseMoveHandler);
+				document.removeEventListener("mouseup", reset);
+			}
+
+			document.addEventListener("mousemove", mouseMoveHandler);
+			document.addEventListener("mouseup", reset);
 		}
 	}
 
@@ -68,21 +86,29 @@ class BezierCurve {
 	activate() {
 		this.active = true;
 
-		let elements = document.getElementsByClassName(`dot${this.dotsId}`);
-		for(let i = 0; i < elements.length; i++) {
-			elements[i].style.backgroundColor = this.activeColor? this.activeColor : "white";
+		let dots = document.getElementsByClassName(`dot${this.dotsId}`);
+		for(let i = 0; i < dots.length; i++) {
+			dots[i].style.backgroundColor = this.activeColor? this.activeColor : "white";
+			dots[i].style.display = "block";
+
+			dots[i].addEventListener("mousedown", this.makeMouseDownHandler(dots[i]));
 		}
 	}
 	deactivate() {
 		this.active = false;
 
-		let elements = document.getElementsByClassName(`dot${this.dotsId}`);
-		for(let i = 0; i < elements.length; i++) {
-			elements[i].style.backgroundColor = "#909090";
+		let dots = document.getElementsByClassName(`dot${this.dotsId}`);
+		for(let i = 0; i < dots.length; i++) {
+			dots[i].style.backgroundColor = "#909090";
+			dots[i].style.display = "none";
+
+			dots[i].removeEventListener("mousedown", this.makeMouseDownHandler(dots[i]));
 		}
 	}
 
-	update() {
+	draw() {
+		const gridRes = window.gridResolution;
+
 		let canvas = document.getElementById("myCanvas");
 		let ctx = canvas.getContext("2d");
 		let rect = canvas.getBoundingClientRect();
@@ -106,5 +132,6 @@ class BezierCurve {
 		);
 
 		ctx.stroke();
+		ctx.closePath();
 	}
 }

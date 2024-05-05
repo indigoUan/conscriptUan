@@ -1,15 +1,15 @@
-window.gridResolution = 17;
+window.gridResolution = 11;
 let showGrid = true;
 
 let curves = [];
 
-curves.push(new BezierCurve(0, "red"));
-curves.push(new BezierCurve(1, "yellow"));
-curves.push(new BezierCurve(2, "lime"));
-curves.push(new BezierCurve(3, "cyan"));
-curves.push(new BezierCurve(4, "blue"));
-curves.push(new BezierCurve(5, "magenta"));
 curves.push(new BezierCurve(6, "white"));
+// curves.push(new BezierCurve(0, "red"));
+// curves.push(new BezierCurve(1, "yellow"));
+// curves.push(new BezierCurve(2, "lime"));
+// curves.push(new BezierCurve(3, "cyan"));
+// curves.push(new BezierCurve(4, "blue"));
+// curves.push(new BezierCurve(5, "magenta"));
 
 for (let i = 0; i < curves.length; i++) {
 	curves[i].activate();
@@ -80,6 +80,24 @@ document.addEventListener("keydown", function(event) {
 		for (let i = 0; i < curves.length; i++) {
 			curves[i].deactivate();
 		}
+	}
+	if(event.key.toLowerCase() === "s") {
+		let curve = new Array();
+
+		for (let i = 0; i < curves.length; i++) {
+			console.log(curves[i].getGriddedPoints());
+			curve.push(curves[i].getGriddedPoints());
+		}
+
+		let lett = new Map();
+		lett.set("gridSize", window.gridResolution);
+		lett.set("curves", curve);
+
+		let script = new Map();
+		script.set("1$ítsa", Object.fromEntries(lett));
+
+		let json = JSON.stringify(Object.fromEntries(script));
+		console.log(json);
 	}
 });
 

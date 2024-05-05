@@ -1,14 +1,13 @@
 class BezierCurve {
-	constructor(dotsId, activeColor) {
+	constructor(dotsId) {
 		this.thickness = 0.035;
 		this.dotsId = dotsId;
-		this.activeColor = activeColor;
 
 		const style = document.createElement("style");
 		style.innerHTML = `.dot${dotsId} {
 			height: 16px;
 			width: 16px;
-			background-color: #909090;
+			background-color: white;
 			border-radius: 50%;
 			position: absolute;
 			cursor: move;
@@ -33,6 +32,20 @@ class BezierCurve {
 			let dot = document.createElement("div");
 			dot.id = `dot${i}_${dotsId}`;
 			dot.className = `dot${dotsId}`;
+			switch (i) {
+				case 0: {
+					dot.style.backgroundColor = "#00ff00";
+					break;
+				}
+				case 2: {
+					dot.style.backgroundColor = "#707070";
+					break;
+				}
+				case 3: {
+					dot.style.backgroundColor = "#ff0000";
+					break;
+				}
+			}
 
 			document.body.appendChild(dot);
 		}
@@ -136,7 +149,6 @@ class BezierCurve {
 
 		const dots = document.getElementsByClassName(`dot${this.dotsId}`);
 		for(let i = 0; i < dots.length; i++) {
-			dots[i].style.backgroundColor = this.activeColor? this.activeColor : "white";
 			dots[i].style.display = "block";
 
 			const handler = this.makeMouseDownHandler(dots[i]);
@@ -150,7 +162,6 @@ class BezierCurve {
 
 		const dots = document.getElementsByClassName(`dot${this.dotsId}`);
 		for(let i = 0; i < dots.length; i++) {
-			dots[i].style.backgroundColor = "#909090";
 			dots[i].style.display = "none";
 
 			const handler = this.makeMouseDownHandler(dots[i]);
@@ -158,7 +169,6 @@ class BezierCurve {
 			dots[i].removeEventListener("touchstart", handler);
 		}
 	}
-	
 
 	draw() {
 		const canvas = document.getElementById("myCanvas");
@@ -183,5 +193,27 @@ class BezierCurve {
 
 		ctx.stroke();
 		ctx.closePath();
+	}
+
+	getGriddedPoints() {
+		let result = new Array(5);
+		result[0] = this.thickness;
+
+		const rect = document.getElementById("myCanvas").getBoundingClientRect();
+		const stepX = rect.width / (window.gridResolution - 1);
+		const stepY = rect.width / (window.gridResolution - 1);
+
+		for (let i = 0; i < 4; i++) {
+			const point = document.getElementsByClassName(`dot${this.dotsId}`)[i].style;
+
+			const snapped = {
+				x: Math.round(parseFloat(point.left) / stepX),
+				y: (Math.round(parseFloat(point.top) / stepY) - 1)
+			}
+
+			result[i + 1] = [ snapped.x, snapped.y ];
+		}
+
+		return result;
 	}
 }

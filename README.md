@@ -14,4 +14,4 @@ conscriptUán is an online tool designed specifically for conlangers and conscri
 3. **Enjoy**: Tinker around a bit and enjoy using this tool 😆😆.
 
 ## License
-See LICENSE.md.
+See [LICENSE](https://github.com/indigoUan/conscriptUan/blob/main/LICENSE).

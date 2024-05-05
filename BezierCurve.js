@@ -61,14 +61,28 @@ class BezierCurve {
 		}
 	}
 
+	snap(point) {
+		const rect = document.getElementById("myCanvas").getBoundingClientRect();
+
+		const stepX = rect.width / (window.gridResolution - 1);
+		const stepY = rect.width / (window.gridResolution - 1);
+
+		const result = {
+			x: Math.round(parseFloat(point.left) / stepX) * stepX,
+			y: (Math.round(parseFloat(point.top) / stepY) - 1) * stepY
+		}
+
+		return result;
+	}
+
 	makeMouseDownHandler(dot) {
 		const rect = document.getElementById("myCanvas").getBoundingClientRect();
+		const snapMethod = this.snap;
 
 		return function(e) {
 			e.preventDefault();
 			let clientX = e.clientX, clientY = e.clientY;
 
-			// If it's a touch event, update the clientX and clientY with the first touch point
 			if (e.touches) {
 				clientX = e.touches[0].clientX;
 				clientY = e.touches[0].clientY;
@@ -81,7 +95,6 @@ class BezierCurve {
 				e.preventDefault();
 				let clientX = e.clientX, clientY = e.clientY;
 
-				// If it's a touch event, update the clientX and clientY with the first touch point
 				if (e.touches) {
 					clientX = e.touches[0].clientX;
 					clientY = e.touches[0].clientY;
@@ -92,6 +105,11 @@ class BezierCurve {
 			}
 
 			function reset() {
+				const snapped = snapMethod(dot.style);
+
+				dot.style.left = `${snapped.x + rect.left - 8}px`;
+				dot.style.top = `${snapped.y + rect.top - 8}px`;
+
 				document.removeEventListener("mousemove", mouseMoveHandler);
 				document.removeEventListener("mouseup", reset);
 				document.removeEventListener("touchmove", mouseMoveHandler);
@@ -143,28 +161,24 @@ class BezierCurve {
 	
 
 	draw() {
-		const gridRes = window.gridResolution;
-
 		const canvas = document.getElementById("myCanvas");
 		const ctx = canvas.getContext("2d");
 		const rect = canvas.getBoundingClientRect();
 
-		const origin = document.getElementsByClassName(`dot${this.dotsId}`)[0];
-		const bPoint1 = document.getElementsByClassName(`dot${this.dotsId}`)[1];
-		const bPoint2 = document.getElementsByClassName(`dot${this.dotsId}`)[2];
-		const end = document.getElementsByClassName(`dot${this.dotsId}`)[3];
-
-		const dotRadius = 8;
+		const origin = this.snap(document.getElementsByClassName(`dot${this.dotsId}`)[0].style);
+		const bPoint1 = this.snap(document.getElementsByClassName(`dot${this.dotsId}`)[1].style);
+		const bPoint2 = this.snap(document.getElementsByClassName(`dot${this.dotsId}`)[2].style);
+		const end = this.snap(document.getElementsByClassName(`dot${this.dotsId}`)[3].style);
 
 		ctx.beginPath();
 		ctx.lineWidth = this.thickness * ((rect.width + rect.height) * 0.5);
 
-		ctx.moveTo(parseFloat(origin.style.left) - rect.left + dotRadius, parseFloat(origin.style.top) - rect.top + dotRadius);
+		ctx.moveTo(origin.x, origin.y);
 
 		ctx.bezierCurveTo(
-			parseFloat(bPoint1.style.left) - rect.left + dotRadius, parseFloat(bPoint1.style.top) - rect.top + dotRadius,
-			parseFloat(bPoint2.style.left) - rect.left + dotRadius, parseFloat(bPoint2.style.top) - rect.top + dotRadius,
-			parseFloat(end.style.left) - rect.left + dotRadius, parseFloat(end.style.top) - rect.top + dotRadius
+			bPoint1.x, bPoint1.y,
+			bPoint2.x, bPoint2.y,
+			end.x, end.y
 		);
 
 		ctx.stroke();

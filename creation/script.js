@@ -1,9 +1,15 @@
-window.gridResolution = 9;
+window.gridResolution = 17;
 let showGrid = true;
 
 let curves = [];
 
-curves.push(new BezierCurve(0));
+curves.push(new BezierCurve(0, "red"));
+curves.push(new BezierCurve(1, "yellow"));
+curves.push(new BezierCurve(2, "lime"));
+curves.push(new BezierCurve(3, "cyan"));
+curves.push(new BezierCurve(4, "blue"));
+curves.push(new BezierCurve(5, "magenta"));
+curves.push(new BezierCurve(6, "white"));
 
 for (let i = 0; i < curves.length; i++) {
 	curves[i].activate();

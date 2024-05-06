@@ -42,23 +42,23 @@ class BezierCurve {
 
 				switch (dot.id) {
 					case "controlDot0": {
-						self.originPoint.x = (X - rect.left) / stepX;
-						self.originPoint.y = (Y - rect.top) / stepY;
+						self.originPoint.x = Math.round((X - rect.left) / stepX);
+						self.originPoint.y = Math.round((Y - rect.top) / stepY);
 						break;
 					}
 					case "controlDot1": {
-						self.controlPoint1.x = (X - rect.left) / stepX;
-						self.controlPoint1.y = (Y - rect.top) / stepY;
+						self.controlPoint1.x = Math.round((X - rect.left) / stepX);
+						self.controlPoint1.y = Math.round((Y - rect.top) / stepY);
 						break;
 					}
 					case "controlDot2": {
-						self.controlPoint2.x = (X - rect.left) / stepX;
-						self.controlPoint2.y = (Y - rect.top) / stepY;
+						self.controlPoint2.x = Math.round((X - rect.left) / stepX);
+						self.controlPoint2.y = Math.round((Y - rect.top) / stepY);
 						break;
 					}
 					case "controlDot3": {
-						self.endPoint.x = (X - rect.left) / stepX;
-						self.endPoint.y = (Y - rect.top) / stepY;
+						self.endPoint.x = Math.round((X - rect.left) / stepX);
+						self.endPoint.y = Math.round((Y - rect.top) / stepY);
 						break;
 					}
 					default: {

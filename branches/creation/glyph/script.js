@@ -1,4 +1,4 @@
-window.gridResolution = 11;
+window.gridResolution = 15;
 let showGrid = true;
 
 let curves = [];
@@ -30,7 +30,7 @@ function drawGrid(canvas, ctx) {
 	}
 }
 
-function drawCurves(canvas, ctx) {
+function drawCurves(ctx) {
 	// setting bezier curve default settings 
 	ctx.lineWidth = 1;
 	ctx.strokeStyle = "black";
@@ -49,7 +49,7 @@ function render() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	drawGrid(canvas, ctx);
-	drawCurves(canvas, ctx);
+	drawCurves(ctx);
 }
 
 {
@@ -67,9 +67,8 @@ function render() {
 
 		window.gridResolution = parsed.gridSize;
 		for (let curve of parsed.curves) {
-			let cur = new BezierCurve(curves.length);
+			let cur = new BezierCurve();
 			cur.thickness = curve.thickness;
-			cur.activate();
 			cur.setGriddedPoints(curve.origin, curve.controlPoint1, curve.controlPoint2, curve.end);
 			curves.push(cur);
 		}
@@ -77,12 +76,15 @@ function render() {
 		let parsed = parseInt(decodeURIComponent(params.get("lines")));
 
 		for (let i = 0; i < parsed; i++) {
-			var curve = new BezierCurve(curves.length);
-			curve.activate();
+			var curve = new BezierCurve();
 			curves.push(curve);
 		}
 
 		console.log("genned " + (parsed) + " default lines");
+	}
+
+	if (curves[0]) {
+		curves[0].activate();
 	}
 }
 

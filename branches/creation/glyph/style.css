@@ -1,0 +1,22 @@
+.controlDots {
+	height: 1px;
+	width: 1px;
+	background-color: white;
+	border-radius: 50%;
+	position: absolute;
+	cursor: move;
+	transform: scale(4000%);
+	display: none;
+
+	-webkit-user-select: none;  /* chrome, safari, opera */
+	-khtml-user-select: none;   /* konqueror (tf is that ?) */
+	-moz-user-select: none;     /* firefox */
+	-ms-user-select: none;      /* IE, edge */
+	user-select: none;          /* unprefixed (few browsers) */
+}
+
+@media (max-width: 768px) {
+	.controlDots {
+		transform: scale(8000%);
+	}
+}

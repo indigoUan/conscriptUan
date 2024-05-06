@@ -1,88 +1,19 @@
 class BezierCurve {
-	constructor(dotsId) {
+	constructor() {
+		this.active = false;
 		this.thickness = 0.035;
-		this.dotsId = dotsId;
-
-		const style = document.createElement("style");
-		style.innerHTML = `.dot${dotsId} {
-			height: 16px;
-			width: 16px;
-			background-color: white;
-			border-radius: 50%;
-			position: absolute;
-			cursor: move;
-			transform: scale(200%);
-
-			-webkit-user-select: none;  /* Chrome, Safari, Opera */
-			-khtml-user-select: none;   /* Konqueror */
-			-moz-user-select: none;     /* Firefox */
-			-ms-user-select: none;      /* Internet Explorer/Edge */
-			user-select: none;          /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
-		}
-
-		@media (max-width: 768px) {
-			.dot${dotsId} {
-				transform: scale(400%);
-			}
-		}`;
-		document.head.appendChild(style);
-		this.deactivate();
-
-		for (let i = 0; i < 4; i++) {
-			let dot = document.createElement("div");
-			dot.id = `dot${i}_${dotsId}`;
-			dot.className = `dot${dotsId}`;
-			switch (i) {
-				case 0: {
-					dot.style.backgroundColor = "#00ff00";
-					break;
-				}
-				case 2: {
-					dot.style.backgroundColor = "#707070";
-					break;
-				}
-				case 3: {
-					dot.style.backgroundColor = "#ff0000";
-					break;
-				}
-			}
-
-			document.body.appendChild(dot);
-		}
-
-		const dots = document.getElementsByClassName(`dot${dotsId}`);
-
-		for (let i = 0; i < dots.length; i++) {
-			const canvas = document.getElementById("myCanvas");
-			const rect = canvas.getBoundingClientRect();
-
-			let initialX = rect.left - 6;
-			let initialY = rect.top - 6;
-
-			if (i == 0) {
-			} else if (i == 1) {
-				initialY += rect.height - 4;
-			} else if (i == 2) {
-				initialX += rect.width - 4;
-			} else if (i == 3) {
-				initialX += rect.width - 4;
-				initialY += rect.height - 4;
-			}
-
-			dots[i].style.left = `${initialX}px`;
-			dots[i].style.top = `${initialY}px`;
-		}
+		this.setGriddedPoints([ 0, 0 ], [ 0, window.gridResolution - 1 ], [ window.gridResolution - 1, 0 ], [ window.gridResolution - 1, window.gridResolution - 1 ]);
 	}
 
-	snap(point) {
+	snapDot(point) {
 		const rect = document.getElementById("myCanvas").getBoundingClientRect();
 
 		const stepX = rect.width / (window.gridResolution - 1);
-		const stepY = rect.width / (window.gridResolution - 1);
+		const stepY = rect.height / (window.gridResolution - 1);
 
 		const result = {
-			x: Math.round((parseFloat(point.left) / stepX) - 0.5) * stepX,
-			y: (Math.round(parseFloat(point.top) / stepY) - 1) * stepY
+			x: Math.round((parseFloat(point.left) - rect.left) / stepX) * stepX,
+			y: Math.round((parseFloat(point.top) - rect.top) / stepY) * stepY
 		}
 
 		return result;
@@ -90,7 +21,8 @@ class BezierCurve {
 
 	makeMouseDownHandler(dot) {
 		const rect = document.getElementById("myCanvas").getBoundingClientRect();
-		const snapMethod = this.snap;
+		const snapMethod = this.snapDot;
+		const self = this;
 
 		return function(e) {
 			e.preventDefault();
@@ -104,6 +36,37 @@ class BezierCurve {
 			const offsetX = clientX - parseInt(window.getComputedStyle(this).left);
 			const offsetY = clientY - parseInt(window.getComputedStyle(this).top);
 
+			function snapCurve(X, Y) {
+				const stepX = rect.width / (window.gridResolution - 1);
+				const stepY = rect.height / (window.gridResolution - 1);
+
+				switch (dot.id) {
+					case "controlDot0": {
+						self.originPoint.x = (X - rect.left) / stepX;
+						self.originPoint.y = (Y - rect.top) / stepY;
+						break;
+					}
+					case "controlDot1": {
+						self.controlPoint1.x = (X - rect.left) / stepX;
+						self.controlPoint1.y = (Y - rect.top) / stepY;
+						break;
+					}
+					case "controlDot2": {
+						self.controlPoint2.x = (X - rect.left) / stepX;
+						self.controlPoint2.y = (Y - rect.top) / stepY;
+						break;
+					}
+					case "controlDot3": {
+						self.endPoint.x = (X - rect.left) / stepX;
+						self.endPoint.y = (Y - rect.top) / stepY;
+						break;
+					}
+					default: {
+						console.log(dot.id);
+					}
+				}
+			}
+
 			function mouseMoveHandler(e) {
 				e.preventDefault();
 				let clientX = e.clientX, clientY = e.clientY;
@@ -113,15 +76,22 @@ class BezierCurve {
 					clientY = e.touches[0].clientY;
 				}
 
-				dot.style.left = `${Math.min(Math.max(clientX - offsetX, rect.left - 6), rect.width + rect.left - 10)}px`;
-				dot.style.top = `${Math.min(Math.max(clientY - offsetY, rect.top - 6), rect.height + rect.top - 10)}px`;
+				const X = Math.min(Math.max(clientX - offsetX, rect.left), rect.width + rect.left);
+				const Y = Math.min(Math.max(clientY - offsetY, rect.top), rect.height + rect.top);
+
+				dot.style.left = `${X}px`;
+				dot.style.top = `${Y}px`;
+
+				snapCurve(X, Y);
 			}
 
 			function reset() {
 				const snapped = snapMethod(dot.style);
 
-				dot.style.left = `${snapped.x + rect.left - 8}px`;
-				dot.style.top = `${snapped.y + rect.top - 8}px`;
+				dot.style.left = `${snapped.x + rect.left}px`;
+				dot.style.top = `${snapped.y + rect.top}px`;
+
+				snapCurve(snapped.x + rect.left, snapped.y + rect.top);
 
 				document.removeEventListener("mousemove", mouseMoveHandler);
 				document.removeEventListener("mouseup", reset);
@@ -145,11 +115,30 @@ class BezierCurve {
 	}
 
 	activate() {
+		if (this.active) return;
 		this.active = true;
 
-		const dots = document.getElementsByClassName(`dot${this.dotsId}`);
+		const rect = document.getElementById("myCanvas").getBoundingClientRect();
+		const stepX = rect.width / (window.gridResolution - 1);
+		const stepY = rect.height / (window.gridResolution - 1);
+
+		const dots = document.getElementsByClassName("controlDots");
 		for(let i = 0; i < dots.length; i++) {
 			dots[i].style.display = "block";
+
+			if (i == 0) {
+				dots[i].style.left = (this.originPoint.x * stepX + rect.left) + "px";
+				dots[i].style.top = (this.originPoint.y * stepY + rect.top) + "px";
+			} else if (i == 1) {
+				dots[i].style.left = (this.controlPoint1.x * stepX + rect.left) + "px";
+				dots[i].style.top = (this.controlPoint1.y * stepY + rect.top) + "px";
+			} else if (i == 2) {
+				dots[i].style.left = (this.controlPoint2.x * stepX + rect.left) + "px";
+				dots[i].style.top = (this.controlPoint2.y * stepY + rect.top) + "px";
+			} else if (i == 3) {
+				dots[i].style.left = (this.endPoint.x * stepX + rect.left) + "px";
+				dots[i].style.top = (this.endPoint.y * stepY + rect.top) + "px";
+			}
 
 			const handler = this.makeMouseDownHandler(dots[i]);
 			dots[i].addEventListener("mousedown", handler);
@@ -158,9 +147,10 @@ class BezierCurve {
 	}
 
 	deactivate() {
+		if (!this.active) return;
 		this.active = false;
 
-		const dots = document.getElementsByClassName(`dot${this.dotsId}`);
+		const dots = document.getElementsByClassName("controlDots");
 		for(let i = 0; i < dots.length; i++) {
 			dots[i].style.display = "none";
 
@@ -174,21 +164,18 @@ class BezierCurve {
 		const canvas = document.getElementById("myCanvas");
 		const ctx = canvas.getContext("2d");
 		const rect = canvas.getBoundingClientRect();
-
-		const origin = this.snap(document.getElementsByClassName(`dot${this.dotsId}`)[0].style);
-		const bPoint1 = this.snap(document.getElementsByClassName(`dot${this.dotsId}`)[1].style);
-		const bPoint2 = this.snap(document.getElementsByClassName(`dot${this.dotsId}`)[2].style);
-		const end = this.snap(document.getElementsByClassName(`dot${this.dotsId}`)[3].style);
+		const stepX = rect.width / (window.gridResolution - 1);
+		const stepY = rect.height / (window.gridResolution - 1);
 
 		ctx.beginPath();
 		ctx.lineWidth = this.thickness * ((rect.width + rect.height) * 0.5);
 
-		ctx.moveTo(origin.x, origin.y);
+		ctx.moveTo(this.originPoint.x * stepX, this.originPoint.y * stepY);
 
 		ctx.bezierCurveTo(
-			bPoint1.x, bPoint1.y,
-			bPoint2.x, bPoint2.y,
-			end.x, end.y
+			this.controlPoint1.x * stepX, this.controlPoint1.y * stepY,
+			this.controlPoint2.x * stepX, this.controlPoint2.y * stepY,
+			this.endPoint.x * stepX, this.endPoint.y * stepY
 		);
 
 		ctx.stroke();
@@ -196,38 +183,30 @@ class BezierCurve {
 	}
 
 	getGriddedPoints() {
-		let result = new Array(4);
-
-		const rect = document.getElementById("myCanvas").getBoundingClientRect();
-		const stepX = rect.width / (window.gridResolution - 1);
-		const stepY = rect.width / (window.gridResolution - 1);
-
-		for (let i = 0; i < 4; i++) {
-			const point = document.getElementsByClassName(`dot${this.dotsId}`)[i].style;
-
-			const snapped = {
-				x: Math.round(parseFloat(point.left) / stepX),
-				y: (Math.round(parseFloat(point.top) / stepY) - 1)
-			}
-
-			result[i] = [ snapped.x, snapped.y ];
-		}
-
-		return result;
+		return [
+			[ this.originPoint.x, this.originPoint.y ],
+			[ this.controlPoint1.x, this.controlPoint1.y ],
+			[ this.controlPoint2.x, this.controlPoint2.y ],
+			[ this.endPoint.x, this.endPoint.y ]
+		];
 	}
 
 	setGriddedPoints(origin, controlPoint1, controlPoint2, end) {
-		const rect = document.getElementById("myCanvas").getBoundingClientRect();
-		const stepX = rect.width / (window.gridResolution - 1);
-		const stepY = rect.width / (window.gridResolution - 1);
-
-		const points = [ origin, controlPoint1, controlPoint2, end ];
-
-		for (let i = 0; i < 4; i++) {
-			const dot = document.getElementsByClassName(`dot${this.dotsId}`)[i];
-
-			dot.style.left = `${stepX * points[i][0] - 8 + rect.left}px`;
-			dot.style.top = `${stepY * points[i][1] - 8 + rect.top}px`;
+		this.originPoint = {
+			x: origin[0],
+			y: origin[1]
+		}
+		this.controlPoint1 = {
+			x: controlPoint1[0],
+			y: controlPoint1[1]
+		}
+		this.controlPoint2 = {
+			x: controlPoint2[0],
+			y: controlPoint2[1]
+		}
+		this.endPoint = {
+			x: end[0],
+			y: end[1]
 		}
 	}
 }

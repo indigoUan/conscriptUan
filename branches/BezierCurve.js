@@ -1,5 +1,11 @@
 class BezierCurve {
 	constructor() {
+		this.dragHandlers = new Array(4);
+		const dots = document.getElementsByClassName("controlDots");
+		for (let i = 0; i < dots.length; i++) {
+			this.dragHandlers[i] = this.makeMouseDownHandler(dots[i]);
+		}
+
 		this.active = false;
 		this.thickness = 0.035;
 		this.setGriddedPoints([ 0, 0 ], [ 0, window.gridResolution - 1 ], [ window.gridResolution - 1, 0 ], [ window.gridResolution - 1, window.gridResolution - 1 ]);
@@ -103,7 +109,7 @@ class BezierCurve {
 			document.addEventListener("touchmove", mouseMoveHandler);
 			document.addEventListener("touchend", reset);
 		}
-	}	
+	}
 
 	toggle() {
 		if (this.active) {
@@ -139,9 +145,8 @@ class BezierCurve {
 				dots[i].style.top = (this.endPoint.y * stepY + rect.top) + "px";
 			}
 
-			const handler = this.makeMouseDownHandler(dots[i]);
-			dots[i].addEventListener("mousedown", handler);
-			dots[i].addEventListener("touchstart", handler);
+			dots[i].addEventListener("mousedown", this.dragHandlers[i]);
+			dots[i].addEventListener("touchstart", this.dragHandlers[i]);
 		}
 	}
 
@@ -153,9 +158,8 @@ class BezierCurve {
 		for(let i = 0; i < dots.length; i++) {
 			dots[i].style.display = "none";
 
-			const handler = this.makeMouseDownHandler(dots[i]);
-			dots[i].removeEventListener("mousedown", handler);
-			dots[i].removeEventListener("touchstart", handler);
+			dots[i].removeEventListener("mousedown", this.dragHandlers[i]);
+			dots[i].removeEventListener("touchstart", this.dragHandlers[i]);
 		}
 	}
 

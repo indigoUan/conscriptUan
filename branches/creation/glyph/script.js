@@ -82,10 +82,6 @@ function render() {
 
 		console.log("genned " + (parsed) + " default lines");
 	}
-
-	if (curves[0]) {
-		curves[0].activate();
-	}
 }
 
 document.getElementById("gridCheckbox").addEventListener("change", function() {
@@ -93,12 +89,36 @@ document.getElementById("gridCheckbox").addEventListener("change", function() {
 	console.log("showGrid:", showGrid);
 });
 
+let selectedLine = -1;
+
 document.addEventListener("keydown", function(event) {
-	if(event.key === " ") {
-		for (let i = 0; i < curves.length; i++) {
-			curves[i].deactivate();
+	if (event.key === "ArrowLeft") {
+		selectedLine--;
+		if (selectedLine < -1) {
+			selectedLine = curves.length - 1;
 		}
 	}
+
+	if (event.key === "ArrowRight") {
+		selectedLine++;
+		if (selectedLine > curves.length - 1) {
+			selectedLine = -1;
+		}
+	}
+
+	if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+		for (let c of curves) {
+			if (c) {
+				c.deactivate();
+			}
+		}
+		if (selectedLine > -1) {
+			if (curves[selectedLine]) {
+				curves[selectedLine].activate();
+			}
+		}
+	}
+
 	if(event.key.toLowerCase() === "s") {
 		let result = "#\n";
 		result += "1$ítsa\n";
@@ -115,6 +135,7 @@ document.addEventListener("keydown", function(event) {
 		console.log(result);
 		downloadStringAsFile(result, "biruscript.gay");
 	}
+
 	if (event.key.toLowerCase() === "l") {
 		let input = document.createElement("input");
 		input.type = "file";

@@ -74,6 +74,8 @@ class BezierCurve {
 			}
 
 			function mouseMoveHandler(e) {
+				window.dirty = true;
+
 				let clientX = e.clientX, clientY = e.clientY;
 
 				if (e.touches) {

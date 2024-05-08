@@ -1,3 +1,5 @@
+window.dirty = false;
+
 window.gridResolution = 15;
 let showGrid = true;
 
@@ -66,7 +68,7 @@ let parsed = undefined;
 
 	if (params.has("loaded")) {
 		parsed = new CsuParser(sessionStorage.getItem("loadedFile"));
-		editingParsedIndex = [parseInt(params.get("loaded"))];
+		editingParsedIndex = parseInt(params.get("loaded"));
 		console.log(editingParsedIndex, parsed.glyphs[editingParsedIndex]);
 
 		window.gridResolution = parsed.glyphs[editingParsedIndex].grid;
@@ -163,7 +165,9 @@ document.addEventListener("keydown", function(event) {
 
 function saveAndReturn() {
 	if (parsed && editingParsedIndex) {
-		console.log(parsed.glyphs[editingParsedIndex].curves);
+		window.dirty = false;
+
+		parsed.glyphs[editingParsedIndex].curves = new Array();
 		for (let curve of curves) {
 			parsed.glyphs[editingParsedIndex].curves.push({
 				thickness: curve.thickness,
@@ -173,6 +177,7 @@ function saveAndReturn() {
 				end: [ curve.endPoint.x, curve.endPoint.y ]
 			});
 		}
+		console.log(parsed.glyphs[editingParsedIndex].curves);
 
 		sessionStorage.setItem("loadedFile", parsed.toString());
 		Redirect.open("branches/creation/whole", "?justEdited");
@@ -180,6 +185,15 @@ function saveAndReturn() {
 		alert("You loaded this page without a glyph.");
 	}
 }
+
+window.addEventListener("beforeunload", function(e) {
+	if (window.dirty) {
+		var confirmationMessage = 'You should save before leaving.';
+
+		e.preventDefault();
+		return confirmationMessage;
+	}
+});
 
 function downloadStringAsFile(string, filename) {
 	var blob = new Blob([string], {type: "text/plain"});

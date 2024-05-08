@@ -2,7 +2,7 @@ let loadedFile = sessionStorage.getItem("loadedFile");
 if (loadedFile === null) {
 	let inputElement = document.createElement("input");
 	inputElement.type = "file";
-	inputElement.accept = ".gay";
+	inputElement.accept = ".json";
 
 	inputElement.onchange = function(event) {
 		let file = event.target.files[0];
@@ -24,12 +24,11 @@ if (loadedFile === null) {
 }
 
 function justLoaded() {
-	let parsed = new GayParser(loadedFile);
-	console.log(parsed.glyphs);
+	let parsed = new CsuParser(loadedFile);
 
 	const params = new URLSearchParams(window.location.search);
 	if (!params.has("justEdited")) {
-		const toEdit = 0;
+		const toEdit = 9; // 9 just for testing 
 
 		Redirect.open("branches/creation/glyph", "?loaded=" + toEdit);
 	} else {

@@ -65,11 +65,11 @@ let parsed = undefined;
 	const params = new URLSearchParams(window.location.search);
 
 	if (params.has("loaded")) {
-		parsed = new GayParser(sessionStorage.getItem("loadedFile"));
+		parsed = new CsuParser(sessionStorage.getItem("loadedFile"));
 		editingParsedIndex = [parseInt(params.get("loaded"))];
 		console.log(editingParsedIndex, parsed.glyphs[editingParsedIndex]);
 
-		window.gridResolution = parsed.glyphs[editingParsedIndex].gridSize;
+		window.gridResolution = parsed.glyphs[editingParsedIndex].grid;
 		for (let curve of parsed.glyphs[editingParsedIndex].curves) {
 			let cur = new BezierCurve();
 			cur.thickness = curve.thickness;
@@ -137,13 +137,13 @@ document.addEventListener("keydown", function(event) {
 
 		result = result.trim();
 		console.log(result);
-		downloadStringAsFile(result, "biruscript.gay");
+		downloadStringAsFile(result, "biruscript.json");
 	}
 
 	if (event.key.toLowerCase() === "l") {
 		let input = document.createElement("input");
 		input.type = "file";
-		input.accept = ".gay";
+		input.accept = ".json";
 		input.onchange = function() {
 			let file = this.files[0];
 			let reader = new FileReader();

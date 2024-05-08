@@ -58,15 +58,19 @@ function render() {
 	ctx.lineCap = "round";
 }
 
+let editingParsedIndex = undefined;
+let parsed = undefined;
+
 {
-	let params = new URLSearchParams(window.location.search);
+	const params = new URLSearchParams(window.location.search);
 
 	if (params.has("loaded")) {
-		let parsed = new GayParser(decodeURIComponent(params.get("loaded")))[0];
-		console.log("Parsed: ", parsed);
+		parsed = new GayParser(sessionStorage.getItem("loadedFile"));
+		editingParsedIndex = [parseInt(params.get("loaded"))];
+		console.log(editingParsedIndex, parsed.glyphs[editingParsedIndex]);
 
-		window.gridResolution = parsed.gridSize;
-		for (let curve of parsed.curves) {
+		window.gridResolution = parsed.glyphs[editingParsedIndex].gridSize;
+		for (let curve of parsed.glyphs[editingParsedIndex].curves) {
 			let cur = new BezierCurve();
 			cur.thickness = curve.thickness;
 			cur.setGriddedPoints(curve.origin, curve.controlPoint1, curve.controlPoint2, curve.end);
@@ -156,6 +160,26 @@ document.addEventListener("keydown", function(event) {
 		input.click();
 	}
 });
+
+function saveAndReturn() {
+	if (parsed && editingParsedIndex) {
+		console.log(parsed.glyphs[editingParsedIndex].curves);
+		for (let curve of curves) {
+			parsed.glyphs[editingParsedIndex].curves.push({
+				thickness: curve.thickness,
+				origin: [ curve.originPoint.x, curve.originPoint.y ],
+				controlPoint1: [ curve.controlPoint1.x, curve.controlPoint1.y ],
+				controlPoint2: [ curve.controlPoint2.x, curve.controlPoint2.y ],
+				end: [ curve.endPoint.x, curve.endPoint.y ]
+			});
+		}
+
+		sessionStorage.setItem("loadedFile", parsed.toString());
+		Redirect.open("branches/creation/whole", "?justEdited");
+	} else {
+		alert("You loaded this page without a glyph.");
+	}
+}
 
 function downloadStringAsFile(string, filename) {
 	var blob = new Blob([string], {type: "text/plain"});

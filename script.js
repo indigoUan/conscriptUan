@@ -1,1 +1,1 @@
-Redirect.open("branches/creation/glyph");
+Redirect.open("branches/creation/whole");

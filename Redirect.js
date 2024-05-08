@@ -1,9 +1,9 @@
 class Redirect {
-	static open(file, data) {
-		if (data && data.length > 2000) {
-			throw "Data too long!";
+	static open(file, extra) {
+		if (extra && extra.length > 2000) {
+			throw "`extra` too long!";
 		}
 
-		window.location.href = "file:///E:/htmls/conscriptUan/" + file + "/index.html" + (data? "?data=" + data : "");
+		window.location.href = "file:///E:/htmls/conscriptUan/" + file + "/index.html" + (extra? extra : "");
 	}
 }

@@ -124,47 +124,10 @@ document.addEventListener("keydown", function(event) {
 			}
 		}
 	}
-
-	if(event.key.toLowerCase() === "s") {
-		let result = "#\n";
-		result += "1$ítsa\n";
-		result += (window.gridResolution) + "\n";
-
-		for (let i = 0; i < curves.length; i++) {
-			result += (curves[i].thickness) + "\n";
-			for (let j of curves[i].getGriddedPoints()) {
-				result += (j[0]) + "," + (j[1]) + "\n";
-			}
-		}
-
-		result = result.trim();
-		console.log(result);
-		downloadStringAsFile(result, "biruscript.json");
-	}
-
-	if (event.key.toLowerCase() === "l") {
-		let input = document.createElement("input");
-		input.type = "file";
-		input.accept = ".json";
-		input.onchange = function() {
-			let file = this.files[0];
-			let reader = new FileReader();
-			reader.onload = function() {
-				let url = new URL(window.location.href);
-				let params = new URLSearchParams(url.search);
-				params.delete("lines");
-				params.set("loaded", encodeURIComponent(reader.result));
-				url.search = params.toString();
-				window.location.href = url.toString();
-			};
-			reader.readAsText(file);
-		};
-		input.click();
-	}
 });
 
 function saveAndReturn() {
-	if (parsed && editingParsedIndex) {
+	if (parsed !== null && editingParsedIndex !== null) {
 		window.dirty = false;
 
 		parsed.glyphs[editingParsedIndex].curves = new Array();
@@ -180,7 +143,7 @@ function saveAndReturn() {
 		console.log(parsed.glyphs[editingParsedIndex].curves);
 
 		sessionStorage.setItem("loadedFile", parsed.toString());
-		Redirect.open("branches/creation/whole", "?justEdited");
+		Redirect.open("branches/creation/whole");
 	} else {
 		alert("You loaded this page without a glyph.");
 	}
@@ -194,23 +157,6 @@ window.addEventListener("beforeunload", function(e) {
 		return confirmationMessage;
 	}
 });
-
-function downloadStringAsFile(string, filename) {
-	var blob = new Blob([string], {type: "text/plain"});
-
-	var url = URL.createObjectURL(blob);
-
-	var a = document.createElement("a");
-	a.href = url;
-	a.download = filename;
-	a.style.display = "none";
-
-	document.body.appendChild(a);
-
-	a.click();
-
-	document.body.removeChild(a);
-}
 
 
 function loop(timestamp) {

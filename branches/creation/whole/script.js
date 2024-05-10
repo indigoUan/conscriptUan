@@ -25,6 +25,30 @@ if (loadedFile === null) {
 
 function justLoaded() {
 	let parsed = new CsuParser(loadedFile);
+/*
+	const nameDiv = document.createElement("text");
+	nameDiv.id = "scriptName"
+	nameDiv.maxlength = "64";
+	nameDiv.size = "12";
+	nameDiv.style = "width: 500px; height: 25px; margin-left: 20px;";
+	nameDiv.value = parsed.name;
+	nameDiv.addEventListener("change", (event) => {
+		console.log(event.target.value);
+		parsed.name = event.target.value;
+		updateStored(parsed);
+	});
+
+	const finishButton = document.createElement("button");
+	finishButton.value = "Save";
+	finishButton.id = "finishButton"
+	finishButton.style="width: 80px; height: 30px;";
+	finishButton.onclick = function(){downloadScript();};
+
+	document.body.append(nameDiv);
+	document.body.append(finishButton);
+	document.body.append("<br><br>");
+*/
+	document.getElementById("scriptName").value = parsed.name;
 
 	for (let i = 0; i < parsed.glyphs.length; i++) {
 		const glyph = parsed.glyphs[i];
@@ -84,7 +108,7 @@ function justLoaded() {
 				grid: 15,
 				curves: new Array()
 			});
-			sessionStorage.setItem("loadedFile", parsed.toString());
+			updateStored(parsed);
 
 			Redirect.open("branches/creation/glyph", "?loaded=" + (parsed.glyphs.length - 1));
 		});
@@ -124,20 +148,21 @@ function justLoaded() {
 	}
 }
 
+function downloadScript() {
+	var blob = new Blob([loadedFile.toString()], {type: "text/plain"});
 
-document.addEventListener("keydown", function(event) {
-	if(event.key.toLowerCase() === "s") {
-		var blob = new Blob([loadedFile.toString()], {type: "text/plain"});
+	var url = URL.createObjectURL(blob);
 
-		var url = URL.createObjectURL(blob);
+	var a = document.createElement("a");
+	a.href = url;
+	a.download = document.getElementById("scriptName").value.toLowerCase().replace(" ", "_") + ".json";
+	a.style.display = "none";
 
-		var a = document.createElement("a");
-		a.href = url;
-		a.download = "biruscript.json";
-		a.style.display = "none";
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+}
 
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-	}
-});
+function updateStored(parsed) {
+	sessionStorage.setItem("loadedFile", parsed.toString());
+}

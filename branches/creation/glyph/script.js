@@ -98,6 +98,27 @@ document.getElementById("gridCheckbox").addEventListener("change", function() {
 let selectedLine = -1;
 
 document.addEventListener("keydown", function(event) {
+	if (event.key === " ") {
+		var curve = new BezierCurve();
+		if (curves[selectedLine]) {
+			curves[selectedLine].deactivate();
+		}
+		curves.push(curve);
+		selectedLine = curves.length - 1;
+		curves[selectedLine].activate();
+		window.dirty = true;
+	}
+	if (event.key === "Backspace") {
+		if (selectedLine >= 0) {
+			if (curves[selectedLine]) {
+				curves[selectedLine].deactivate();
+			}
+			curves.splice(selectedLine, 1);
+			selectedLine = -1;
+			window.dirty = true;
+		}
+	}
+
 	if (event.key === "ArrowLeft") {
 		selectedLine--;
 		if (selectedLine < -1) {
@@ -112,7 +133,7 @@ document.addEventListener("keydown", function(event) {
 		}
 	}
 
-	if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+	if (event.key === "ArrowLeft" || event.key === "ArrowRight" || event.key === "Backspace") {
 		for (let c of curves) {
 			if (c) {
 				c.deactivate();
@@ -140,7 +161,11 @@ function saveAndReturn() {
 				end: [ curve.endPoint.x, curve.endPoint.y ]
 			});
 		}
-		console.log(parsed.glyphs[editingParsedIndex].curves);
+		if (parsed.glyphs[editingParsedIndex].curves.length === 0) {
+			parsed.glyphs.splice(editingParsedIndex, 1);
+		} else {
+			console.log(parsed.glyphs[editingParsedIndex].curves);
+		}
 
 		sessionStorage.setItem("loadedFile", parsed.toString());
 		Redirect.open("branches/creation/whole");

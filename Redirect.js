@@ -4,6 +4,9 @@ class Redirect {
 			throw "`extra` too long!";
 		}
 
-		window.location.href = "file:///E:/htmls/conscriptUan/" + file + "/index.html" + (extra? extra : "");
+		// const init = "file:///E:/htmls/conscriptUan";
+		const init = "C:/Users/Utente/Documents/gioele neri 2apss/conscript";
+
+		window.location.href = init + "/" + file + "/index.html" + (extra? extra : "");
 	}
 }

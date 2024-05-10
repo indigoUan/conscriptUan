@@ -3,12 +3,16 @@ const currentCsuVersion = "α.0.0";
 class CsuParser {
 	constructor(csu) {
 		this.glyphs = [];
+		this.name = "Unnamed Script";
 
 		const json = JSON.parse(csu);
 
 		switch (json.version) {
 			case "α.0.0": {
 				this.glyphs = new Array();
+				if (json.name) {
+					this.name = json.name;
+				}
 
 				for (let glyph of json.glyphs) {
 					const newGlyph = {
@@ -36,6 +40,7 @@ class CsuParser {
 
 	toString() {
 		let json = {
+			name: this.name,
 			version: currentCsuVersion,
 			glyphs: new Array()
 		}
@@ -60,6 +65,7 @@ class CsuParser {
 			json.glyphs.push(newGlyph);
 		}
 
+		console.log(json);
 		return JSON.stringify(json);
 	}
 }

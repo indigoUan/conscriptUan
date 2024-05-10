@@ -1,55 +1,38 @@
-let loadedFile = sessionStorage.getItem("loadedFile");
-if (loadedFile === null) {
-	let inputElement = document.createElement("input");
-	inputElement.type = "file";
-	inputElement.accept = ".json";
+let hoveringId = -1;
 
-	inputElement.onchange = function(event) {
-		let file = event.target.files[0];
-		let reader = new FileReader();
+let parsed = new CsuParser(sessionStorage.getItem("loadedFile"));
 
-		reader.onload = function(event) {
-			loadedFile = event.target.result;
-			sessionStorage.setItem("loadedFile", loadedFile);
-			document.body.removeChild(inputElement);
-			justLoaded();
-		};
+const nameDiv = document.getElementById("scriptName");
+nameDiv.value = parsed.name;
+nameDiv.addEventListener("change", (event) => {
+	console.log(event.target.value);
+	parsed.name = event.target.value;
+	updateStored();
+});
 
-		reader.readAsText(file);
-	};
+document.getElementById("deleteGlyph").addEventListener("click", function(e) {
+	if (hoveringId >= 0) {
+		parsed.glyphs.splice(hoveringId, 1);
+		console.log("subcanvas" + hoveringId);
+		hoveringId = -1;
+		updateStored();
+		reload();
+	}
+});
 
-	document.body.appendChild(inputElement);
-} else {
-	justLoaded();
-}
+let lastLength = 0;
 
-function justLoaded() {
-	let parsed = new CsuParser(loadedFile);
-/*
-	const nameDiv = document.createElement("text");
-	nameDiv.id = "scriptName"
-	nameDiv.maxlength = "64";
-	nameDiv.size = "12";
-	nameDiv.style = "width: 500px; height: 25px; margin-left: 20px;";
-	nameDiv.value = parsed.name;
-	nameDiv.addEventListener("change", (event) => {
-		console.log(event.target.value);
-		parsed.name = event.target.value;
-		updateStored(parsed);
-	});
+function reload() {
+	for (let i = 0; i < lastLength; i++) {
+		if (document.getElementById("subcanvas" + i)) {
+			document.body.removeChild(document.getElementById("subcanvas" + i));
+		}
+	}
+	if (document.getElementById("subcanvasAdd")) {
+		document.body.removeChild(document.getElementById("subcanvasAdd"));
+	}
 
-	const finishButton = document.createElement("button");
-	finishButton.value = "Save";
-	finishButton.id = "finishButton"
-	finishButton.style="width: 80px; height: 30px;";
-	finishButton.onclick = function(){downloadScript();};
-
-	document.body.append(nameDiv);
-	document.body.append(finishButton);
-	document.body.append("<br><br>");
-*/
-	document.getElementById("scriptName").value = parsed.name;
-
+	lastLength = parsed.glyphs.length;
 	for (let i = 0; i < parsed.glyphs.length; i++) {
 		const glyph = parsed.glyphs[i];
 
@@ -58,18 +41,9 @@ function justLoaded() {
 		let newCanv = document.createElement("canvas");
 		newCanv.id = "subcanvas" + i;
 		newCanv.width = newCanv.height = "100";
-		newCanv.style = "margin-left: 20px; margin-right: 20px; margin-top: 20px; margin-bottom: 20px;";
+		newCanv.style = "margin-left: 20px; margin-top: 20px; margin-bottom: 20px; cursor: pointer;";
 		newCanv.style.backgroundColor = "white";
 		document.body.appendChild(newCanv);
-
-		newCanv.addEventListener("click", function(e) {
-			Redirect.open("branches/creation/glyph", "?loaded=" + i);
-		});
-
-		let textElement = document.createElement("span");
-		textElement.style = "text-align: center; transform: translateX(-50px);";
-		textElement.textContent = glyph.name;
-		// document.body.appendChild(textElement);
 
 		const ctx = newCanv.getContext("2d");
 		ctx.lineCap = "round";
@@ -92,29 +66,32 @@ function justLoaded() {
 			ctx.stroke();
 			ctx.closePath();
 		}
+
+		newCanv.addEventListener("click", function(e) {
+			Redirect.open("branches/creation/glyph", "?loaded=" + i);
+		});
 	}
 
 	// adding the New Glyph canvas 
 	{
-		let newCanv = document.createElement("canvas");
-		newCanv.id = "subcanvasAdd";
-		newCanv.width = newCanv.height = "100";
-		newCanv.style = "margin-left: 20px; margin-right: 20px; margin-top: 20px; margin-bottom: 20px;";
-		document.body.appendChild(newCanv);
+		let addNewGlyph = document.createElement("canvas");
+		addNewGlyph.id = "subcanvasAdd";
+		addNewGlyph.width = addNewGlyph.height = "100";
+		addNewGlyph.style = "margin-left: 20px; margin-top: 20px; margin-bottom: 20px; cursor: pointer;";
+		document.body.appendChild(addNewGlyph);
 
-		newCanv.addEventListener("click", function(e) {
+		addNewGlyph.addEventListener("click", function(e) {
 			parsed.glyphs.push({
 				name: "Unnamed Glyph",
 				grid: 15,
 				curves: new Array()
 			});
-			updateStored(parsed);
+			updateStored();
 
 			Redirect.open("branches/creation/glyph", "?loaded=" + (parsed.glyphs.length - 1));
 		});
 
-		const ctx = newCanv.getContext("2d");
-
+		const ctx = addNewGlyph.getContext("2d");
 		{
 			ctx.beginPath();
 			ctx.lineWidth = 24;
@@ -149,7 +126,7 @@ function justLoaded() {
 }
 
 function downloadScript() {
-	var blob = new Blob([loadedFile.toString()], {type: "text/plain"});
+	var blob = new Blob([parsed.toString()], {type: "text/plain"});
 
 	var url = URL.createObjectURL(blob);
 
@@ -163,6 +140,48 @@ function downloadScript() {
 	document.body.removeChild(a);
 }
 
-function updateStored(parsed) {
+function updateStored() {
 	sessionStorage.setItem("loadedFile", parsed.toString());
 }
+
+let mouse = { x: 0, y: 0 }
+
+document.addEventListener('mousemove', function(e) {
+	mouse.x = e.clientX;
+	mouse.y = e.clientY;
+});
+
+function loop(timestamp) {
+	hoveringId = -1;
+
+	for (let i = 0; i < parsed.glyphs.length; i++) {
+		const canv = document.getElementById("subcanvas" + i);
+		if (canv) {
+			const rect = canv.getBoundingClientRect();
+			if (rect) {
+				if (mouse.x >= rect.left && mouse.x <= rect.left + rect.width && mouse.y >= rect.top && mouse.y <= rect.top + rect.height) {
+					hoveringId = i;
+					break;
+				}
+			}
+		}
+	}
+
+	const deleteGlyph = document.getElementById("deleteGlyph");
+
+	if (hoveringId >= 0) {
+		const canv = document.getElementById("subcanvas" + hoveringId);
+
+		deleteGlyph.style.display = "block";
+
+		deleteGlyph.style.left = (canv.getBoundingClientRect().right - deleteGlyph.getBoundingClientRect().width) + "px";
+		deleteGlyph.style.top = (canv.getBoundingClientRect().bottom - deleteGlyph.getBoundingClientRect().height) + "px";
+	} else {
+		deleteGlyph.style.display = "none";
+	}
+
+	requestAnimationFrame(loop);
+}
+
+reload();
+requestAnimationFrame(loop);

@@ -1,5 +1,3 @@
-const currentCsuVersion = "α.0.0";
-
 class CsuParser {
 	constructor(csu) {
 		this.glyphs = [];
@@ -41,7 +39,7 @@ class CsuParser {
 	toString() {
 		let json = {
 			name: this.name,
-			version: currentCsuVersion,
+			version: currentToolVersion,
 			glyphs: new Array()
 		}
 

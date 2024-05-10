@@ -1,6 +1,7 @@
 <!DOCTYPE html>
+<meta charset="UTF-8">
 
-<title>conscriptUán</title>
+<title>conscriptUán - Home</title>
 <meta content="conscriptUán" property="og:title" />
 <meta content="An online tool for creating and rendering conscripts." property="og:description" />
 <!-- <meta content="https://indigouan.github.io/conscriptUan" property="og:url" /> -->
@@ -8,15 +9,30 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="style.css">
+		<style>
+			.buttons {
+				display: flex;
+				justify-content: center;
+				flex-direction: column;
+				align-items: center;
+			}
+			button {
+				font-family: Verdana, sans-serif;
+				font-size: 20pt;
+			}
+		</style>
 	</head>
 
 	<body>
-		<input id="fileIn" type="file" accept=".json">Load .json File</input>
+		<div class="buttons">
+			<button id="loadButton" onclick="loadScript()" style="size: 10; width: 550px; height: 60px; margin-top: 25%;">Load Script File</button>
+			<br>
+			<button id="newButton" onclick="createNewScript()" style="size: 10; width: 550px; height: 60px;">Create New Script</button>
+			<br><br>
+		</div>
 	</body>
 
-	<div id="label-text">
-		© îndigoUán - 2024 - ver: α.0.0
-	</div>
+	<script src="ToolVersion.js"></script>
 </html>
 
 <script src="Redirect.js"></script>

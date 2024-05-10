@@ -145,6 +145,14 @@ document.addEventListener("keydown", function(event) {
 			}
 		}
 	}
+
+	if (event.key === "Enter") {
+		saveAndReturn();
+	}
+
+	if (event.key === "Escape") {
+		cancelAndReturn();
+	}
 });
 
 function saveAndReturn() {
@@ -161,6 +169,24 @@ function saveAndReturn() {
 				end: [ curve.endPoint.x, curve.endPoint.y ]
 			});
 		}
+		if (parsed.glyphs[editingParsedIndex].curves.length === 0) {
+			parsed.glyphs.splice(editingParsedIndex, 1);
+		} else {
+			console.log(parsed.glyphs[editingParsedIndex].curves);
+		}
+
+		sessionStorage.setItem("loadedFile", parsed.toString());
+		Redirect.open("branches/creation/whole");
+	} else {
+		alert("You loaded this page without a glyph.");
+	}
+}
+
+function cancelAndReturn() {
+	if (parsed !== null && editingParsedIndex !== null) {
+		window.dirty = false;
+
+		console.log(parsed.glyphs[editingParsedIndex].curves);
 		if (parsed.glyphs[editingParsedIndex].curves.length === 0) {
 			parsed.glyphs.splice(editingParsedIndex, 1);
 		} else {

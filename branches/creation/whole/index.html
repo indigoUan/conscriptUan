@@ -1,6 +1,7 @@
 <!DOCTYPE html>
+<meta charset="UTF-8">
 
-<title>conscriptUán</title>
+<title>conscriptUán - Script</title>
 <meta content="conscriptUán" property="og:title" />
 <meta content="An online tool for creating and rendering conscripts." property="og:description" />
 <!-- <meta content="https://indigouan.github.io/conscriptUan" property="og:url" /> -->
@@ -8,18 +9,30 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="../../../style.css">
+		<style>
+			#glyphActions {
+				position: fixed;
+				pointer-events: none;
+
+				-webkit-user-select: none;  /* chrome, safari, opera */
+				-khtml-user-select: none;   /* konqueror (tf is that ?) */
+				-moz-user-select: none;     /* firefox */
+				-ms-user-select: none;      /* IE, edge */
+				user-select: none;          /* unprefixed (few browsers) */
+			}
+		</style>
 	</head>
 
 	<body>
 		<input type="text" id="scriptName" maxlength="64" size="10" style="width: 500px; height: 25px; margin-left: 20px;" value="Unnamed Script"/>
 
 		<button id="finishButton" onclick="downloadScript()" style="width: 80px; height: 30px;">Save</button>
+
+		<img class="glyphActions" id="deleteGlyph" src="deleteGlyph.png" style="display: none; position: fixed; cursor: pointer;"/>
 		<br><br>
 	</body>
 
-	<div id="label-text">
-		© îndigoUán - 2024 - ver: α.0.0
-	</div>
+	<script src="../../../ToolVersion.js"></script>
 </html>
 
 <script src="../../../Redirect.js"></script>

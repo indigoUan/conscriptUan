@@ -1,6 +1,7 @@
 <!DOCTYPE html>
+<meta charset="UTF-8">
 
-<title>conscriptUán</title>
+<title>conscriptUán - Glyph</title>
 <meta content="conscriptUán" property="og:title" />
 <meta content="An online tool for creating and rendering conscripts." property="og:description" />
 <!-- <meta content="https://indigouan.github.io/conscriptUan" property="og:url" /> -->
@@ -13,6 +14,7 @@
 
 	<body>
 		<button id="finishButton" onclick="saveAndReturn()" style="width: 100px; height: 40px;">Finish</button>
+		<button id="cancelButton" onclick="cancelAndReturn()" style="width: 100px; height: 40px;">Cancel</button>
 		<br><br>
 		<input type="checkbox" id="gridCheckbox" checked>Show Grid</input>
 		<br><br><br>
@@ -20,15 +22,13 @@
 			Your browser does not support HTML5 canvases.
 		</canvas>
 
-		<div id="controlDot0" class="controlDots" style="background-color: #00ff00;"> </div>
-		<div id="controlDot1" class="controlDots" style="background-color: #ffffff;"> </div>
-		<div id="controlDot2" class="controlDots" style="background-color: #707070;"> </div>
-		<div id="controlDot3" class="controlDots" style="background-color: #ff0000;"> </div>
+		<div id="controlDot0" class="controlDots" style="background-color: #00ff00; position: fixed;"> </div>
+		<div id="controlDot1" class="controlDots" style="background-color: #ffffff; position: fixed;"> </div>
+		<div id="controlDot2" class="controlDots" style="background-color: #707070; position: fixed;"> </div>
+		<div id="controlDot3" class="controlDots" style="background-color: #ff0000; position: fixed;"> </div>
 	</body>
 
-	<div id="label-text">
-		© îndigoUán - 2024 - ver: α.0.0
-	</div>
+	<script src="../../../ToolVersion.js"></script>
 </html>
 
 <script src="../../../Redirect.js"></script>

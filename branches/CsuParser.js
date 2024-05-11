@@ -65,5 +65,6 @@ class CsuParser {
 
 		console.log(json);
 		return JSON.stringify(json);
+		// return JSON.stringify(json, null, "\t");
 	}
 }

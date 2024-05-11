@@ -78,15 +78,13 @@ let parsed = undefined;
 			cur.setGriddedPoints(curve.origin, curve.controlPoint1, curve.controlPoint2, curve.end);
 			curves.push(cur);
 		}
-	} else if (params.has("lines")) {
-		let parsed = parseInt(decodeURIComponent(params.get("lines")));
 
-		for (let i = 0; i < parsed; i++) {
-			var curve = new BezierCurve();
-			curves.push(curve);
-		}
-
-		console.log("genned " + (parsed) + " default lines");
+		const nameDiv = document.getElementById("glyphName");
+		nameDiv.value = parsed.glyphs[editingParsedIndex].name;
+		nameDiv.addEventListener("change", (event) => {
+			console.log(event.target.value);
+			parsed.glyphs[editingParsedIndex].name = event.target.value;
+		});
 	}
 }
 
@@ -189,11 +187,11 @@ function cancelAndReturn() {
 		console.log(parsed.glyphs[editingParsedIndex].curves);
 		if (parsed.glyphs[editingParsedIndex].curves.length === 0) {
 			parsed.glyphs.splice(editingParsedIndex, 1);
+			sessionStorage.setItem("loadedFile", parsed.toString());
 		} else {
 			console.log(parsed.glyphs[editingParsedIndex].curves);
 		}
 
-		sessionStorage.setItem("loadedFile", parsed.toString());
 		Redirect.open("branches/creation/whole");
 	} else {
 		alert("You loaded this page without a glyph.");
@@ -209,6 +207,61 @@ window.addEventListener("beforeunload", function(e) {
 	}
 });
 
+function flipXorY(axis) {
+	if (selectedLine > -1) {
+		if (curves[selectedLine]) {
+			curves[selectedLine].deactivate();
+		}
+	}
+
+	for (let curve of curves) {
+		if (axis === 0) {
+			curve.originPoint.x = window.gridResolution - curve.originPoint.x - 1;
+			curve.controlPoint1.x = window.gridResolution - curve.controlPoint1.x - 1;
+			curve.controlPoint2.x = window.gridResolution - curve.controlPoint2.x - 1;
+			curve.endPoint.x = window.gridResolution - curve.endPoint.x - 1;
+		} else {
+			curve.originPoint.y = window.gridResolution - curve.originPoint.y - 1;
+			curve.controlPoint1.y = window.gridResolution - curve.controlPoint1.y - 1;
+			curve.controlPoint2.y = window.gridResolution - curve.controlPoint2.y - 1;
+			curve.endPoint.y = window.gridResolution - curve.endPoint.y - 1;
+		}
+	}
+
+	if (selectedLine > -1) {
+		if (curves[selectedLine]) {
+			curves[selectedLine].activate();
+		}
+	}
+}
+
+function moveAll(axis, value) {
+	if (selectedLine > -1) {
+		if (curves[selectedLine]) {
+			curves[selectedLine].deactivate();
+		}
+	}
+
+	for (let curve of curves) {
+		if (axis === 0) {
+			curve.originPoint.x += value;
+			curve.controlPoint1.x += value;
+			curve.controlPoint2.x += value;
+			curve.endPoint.x += value;
+		} else {
+			curve.originPoint.y += value;
+			curve.controlPoint1.y += value;
+			curve.controlPoint2.y += value;
+			curve.endPoint.y += value;
+		}
+	}
+
+	if (selectedLine > -1) {
+		if (curves[selectedLine]) {
+			curves[selectedLine].activate();
+		}
+	}
+}
 
 function loop(timestamp) {
 	render();

@@ -70,6 +70,17 @@ function reload() {
 		newCanv.addEventListener("click", function(e) {
 			Redirect.open("branches/creation/glyph", "?loaded=" + i);
 		});
+
+		newCanv.addEventListener("contextmenu", function(e) {
+			e.preventDefault();
+			parsed.glyphs.push({
+				name: glyph.name,
+				grid: glyph.grid,
+				curves: glyph.curves
+			});
+			updateStored();
+			reload();
+		});
 	}
 
 	// adding the New Glyph canvas 

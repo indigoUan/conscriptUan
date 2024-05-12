@@ -7,7 +7,7 @@ class BezierCurve {
 		}
 
 		this.active = false;
-		this.thickness = 0.035;
+		this.thickness = 0.04;
 		this.setGriddedPoints([ 0, 0 ], [ 0, window.gridResolution - 1 ], [ window.gridResolution - 1, 0 ], [ window.gridResolution - 1, window.gridResolution - 1 ]);
 	}
 

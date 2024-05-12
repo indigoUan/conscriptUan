@@ -76,7 +76,8 @@ function reload() {
 			parsed.glyphs.push({
 				name: glyph.name,
 				grid: glyph.grid,
-				curves: glyph.curves
+				curves: glyph.curves,
+				parts: glyph.parts
 			});
 			updateStored();
 			reload();

@@ -144,6 +144,15 @@ document.addEventListener("keydown", function(event) {
 		}
 	}
 
+	if (curves[selectedLine] && (event.key === "-" || event.key === "+")) {
+		if (event.key === "-") {
+			curves[selectedLine].thickness = Math.max(curves[selectedLine].thickness - 0.01, 0.01);
+		}
+		if (event.key === "+") {
+			curves[selectedLine].thickness = Math.min(curves[selectedLine].thickness + 0.01, 1);
+		}
+	}
+
 	if (event.key === "Enter") {
 		saveAndReturn();
 	}

@@ -17,18 +17,18 @@
 		<button id="finishButton" onclick="saveAndReturn()" style="width: 80px; height: 30px;">Finish</button>
 		<button id="cancelButton" onclick="cancelAndReturn()" style="width: 80px; height: 30px;">Cancel</button>
 		<br><br>
+		<input type="checkbox" id="gridCheckbox" checked>Show Grid</input>
+		<br>
 		<canvas id="myCanvas" width="700" height="700" style="border:1px solid #ffffff; margin-left: 32px;">
 			Your browser does not support HTML5 canvases.
 		</canvas>
 		<br>
 		<button id="xFlipButton" onclick="flipXorY(0)" style="width: 60px; height: 40px;">Flip X</button>
 		<button id="yFlipButton" onclick="flipXorY(1)" style="width: 60px; height: 40px;">Flip Y</button>
-		<button id="xMoveMoreButton" onclick="moveAll(0, 1)" style="width: 60px; height: 40px; margin-left: 100px;">X + 1</button>
+		<button id="xMoveMoreButton" onclick="moveAll(0, 1)" style="width: 60px; height: 40px; margin-left: 70px;">X + 1</button>
 		<button id="xMoveLessButton" onclick="moveAll(0, -1)" style="width: 60px; height: 40px;">X - 1</button>
 		<button id="yMoveMoreButton" onclick="moveAll(1, 1)" style="width: 60px; height: 40px;">Y + 1</button>
 		<button id="yMoveLessButton" onclick="moveAll(1, -1)" style="width: 60px; height: 40px;">Y - 1</button>
-		<br>
-		<input type="checkbox" id="gridCheckbox" checked>Show Grid</input>
 
 		<div id="controlDot0" class="controlDots" style="background-color: #00ff00; position: fixed;"> </div>
 		<div id="controlDot1" class="controlDots" style="background-color: #ffffff; position: fixed;"> </div>

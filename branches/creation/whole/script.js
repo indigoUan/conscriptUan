@@ -152,6 +152,10 @@ function downloadScript() {
 	document.body.removeChild(a);
 }
 
+function useScript() {
+	Redirect.open("branches/creation/text");
+}
+
 function updateStored() {
 	sessionStorage.setItem("loadedFile", parsed.toString());
 }

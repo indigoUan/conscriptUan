@@ -1,4 +1,5 @@
 window.dirty = false;
+window.sortables = new Array();
 
 window.gridResolution = 15;
 let showGrid = true;
@@ -71,6 +72,52 @@ let parsed = undefined;
 		editingParsedIndex = parseInt(params.get("loaded"));
 		console.log(editingParsedIndex, parsed.glyphs[editingParsedIndex]);
 
+		{
+			let newCanv = document.createElement("canvas");
+			newCanv.id = "sortableCanvas-1";
+			newCanv.width = newCanv.height = "100";
+			newCanv.style = "margin-left: 20px; margin-top: 18px; margin-bottom: 20px; cursor: pointer;";
+			newCanv.addEventListener("click", function(e) {
+				if (selectedLine > -1 && curves[selectedLine]) {
+					curves[selectedLine].deactivate();
+				}
+				selectedLine = -1;
+			});
+			document.getElementById("sortableCanvases").appendChild(newCanv);
+
+			const ctx = newCanv.getContext("2d");
+			{
+				ctx.beginPath();
+				ctx.lineWidth = 24;
+				ctx.strokeStyle = "white";			
+
+				ctx.moveTo(50, 3);
+				ctx.lineTo(50, 97);
+				ctx.stroke();
+
+				ctx.moveTo(3, 50);
+				ctx.lineTo(97, 50);
+				ctx.stroke();
+
+				ctx.closePath();
+			}
+			{
+				ctx.beginPath();
+				ctx.lineWidth = 20;
+				ctx.strokeStyle = "black";			
+
+				ctx.moveTo(50, 5);
+				ctx.lineTo(50, 95);
+				ctx.stroke();
+
+				ctx.moveTo(5, 50);
+				ctx.lineTo(95, 50);
+				ctx.stroke();
+
+				ctx.closePath();
+			}
+		}
+
 		window.gridResolution = parsed.glyphs[editingParsedIndex].grid;
 		for (let curve of parsed.glyphs[editingParsedIndex].curves) {
 			let cur = new BezierCurve();
@@ -78,6 +125,62 @@ let parsed = undefined;
 			cur.setGriddedPoints(curve.origin, curve.controlPoint1, curve.controlPoint2, curve.end);
 			curves.push(cur);
 		}
+
+	// adding the New Glyph canvas 
+	{
+		let addNewGlyph = document.createElement("canvas");
+		addNewGlyph.id = "subcanvasAdd";
+		addNewGlyph.width = addNewGlyph.height = "100";
+		addNewGlyph.style = "margin-left: 20px; margin-top: 20px; margin-bottom: 20px; cursor: pointer;";
+		document.getElementById("sortableCanvases").appendChild(addNewGlyph);
+
+		addNewGlyph.addEventListener("click", function(e) {
+			document.getElementById("sortableCanvases").removeChild(addNewGlyph);
+
+			var curve = new BezierCurve();
+			if (curves[selectedLine]) {
+				curves[selectedLine].deactivate();
+			}
+			curves.push(curve);
+			selectedLine = curves.length - 1;
+			curves[selectedLine].activate();
+			window.dirty = true;
+
+			document.getElementById("sortableCanvases").appendChild(addNewGlyph);
+		});
+
+		const ctx = addNewGlyph.getContext("2d");
+		{
+			ctx.beginPath();
+			ctx.lineWidth = 24;
+			ctx.strokeStyle = "white";			
+
+			ctx.moveTo(50, 3);
+			ctx.lineTo(50, 97);
+			ctx.stroke();
+
+			ctx.moveTo(3, 50);
+			ctx.lineTo(97, 50);
+			ctx.stroke();
+
+			ctx.closePath();
+		}
+		{
+			ctx.beginPath();
+			ctx.lineWidth = 20;
+			ctx.strokeStyle = "black";			
+
+			ctx.moveTo(50, 5);
+			ctx.lineTo(50, 95);
+			ctx.stroke();
+
+			ctx.moveTo(5, 50);
+			ctx.lineTo(95, 50);
+			ctx.stroke();
+
+			ctx.closePath();
+		}
+	}
 
 		const nameDiv = document.getElementById("glyphName");
 		nameDiv.value = parsed.glyphs[editingParsedIndex].name;
@@ -96,16 +199,6 @@ document.getElementById("gridCheckbox").addEventListener("change", function() {
 let selectedLine = -1;
 
 document.addEventListener("keydown", function(event) {
-	if (event.key === " ") {
-		var curve = new BezierCurve();
-		if (curves[selectedLine]) {
-			curves[selectedLine].deactivate();
-		}
-		curves.push(curve);
-		selectedLine = curves.length - 1;
-		curves[selectedLine].activate();
-		window.dirty = true;
-	}
 	if (event.key === "Backspace") {
 		if (selectedLine >= 0) {
 			if (curves[selectedLine]) {
@@ -114,33 +207,6 @@ document.addEventListener("keydown", function(event) {
 			curves.splice(selectedLine, 1);
 			selectedLine = -1;
 			window.dirty = true;
-		}
-	}
-
-	if (event.key === "ArrowLeft") {
-		selectedLine--;
-		if (selectedLine < -1) {
-			selectedLine = curves.length - 1;
-		}
-	}
-
-	if (event.key === "ArrowRight") {
-		selectedLine++;
-		if (selectedLine > curves.length - 1) {
-			selectedLine = -1;
-		}
-	}
-
-	if (event.key === "ArrowLeft" || event.key === "ArrowRight" || event.key === "Backspace") {
-		for (let c of curves) {
-			if (c) {
-				c.deactivate();
-			}
-		}
-		if (selectedLine > -1) {
-			if (curves[selectedLine]) {
-				curves[selectedLine].activate();
-			}
 		}
 	}
 

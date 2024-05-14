@@ -2,16 +2,31 @@ const parsed = new CsuParser(sessionStorage.getItem("loadedFile"));
 
 function seek(name) {
 	for (const glyph of parsed.glyphs) {
-		if (glyph.name === name) {
-			return glyph;
+		const allNames = glyph.name.split("/");
+		for (const possible of allNames) {
+			if (possible === name) {
+				return glyph;
+			}
 		}
 	}
 	return undefined;
 }
 
+let whiteBg = false;
+let oldText = "";
 function render() {
-	const text = document.getElementById("inputText").value.trim();
+	const text = oldText;
 	const charSize = document.getElementById("charSize").value;
+
+	const canvas = document.getElementById("myCanvas");
+	const ctx = canvas.getContext("2d");
+
+	if (whiteBg) {
+		canvas.style.backgroundColor = "white";
+	} else {
+		canvas.style.backgroundColor = "transparent";
+	}
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	if (text.length > 0) {
 		let maxLine = 0;
@@ -37,10 +52,6 @@ function render() {
 			maxLine = Math.max(maxLine, thisLine.length);
 			lineArray.push(thisLine);
 		}
-
-		const canvas = document.getElementById("myCanvas");
-		const ctx = canvas.getContext("2d");
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		// horizontal - vertical 
 		// canvas.width = charSize * maxLine;
@@ -95,3 +106,16 @@ function render() {
 		}
 	}
 }
+
+function loop(timestamp) {
+	const text = document.getElementById("inputText").value.trim();
+	const white = document.getElementById("whiteBg").checked;
+	if (text !== oldText || white !== whiteBg) {
+		oldText = text;
+		whiteBg = white;
+		render();
+	}
+
+	requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);

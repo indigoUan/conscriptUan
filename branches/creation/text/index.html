@@ -16,18 +16,18 @@
 		<br><br>
 		<textarea id="inputText" rows="15" cols="50" autocomplete="off"></textarea>
 		<br>
-		<select id="writingOrder">
+		<select id="writingOrder" onchange="render();">
 			<option value="lrtd">Left-Right Top-Down</option>
 			<option value="rltd">Right-Left Top-Down</option>
 			<option value="tdlr">Top-Down Left-Right</option>
 		</select>
-		<input type="checkbox" id="isOx">Boustrophedon (alternating directions)</input>
-		<br>
-		<!-- <input type="checkbox" id="monospace">Monospace</input>
+		<!-- <input type="checkbox" id="isOx">Boustrophedon (alternating directions)</input>
 		<br> -->
+		<!-- <input type="checkbox" id="monospace">Monospace</input> -->
+		<br>
 		<div style="display: flex; align-items: center;">
 			<p>Default character size:</p>
-			<input id="charSize" type="range" min="50" max="150" value="50" class="slider">
+			<input id="charSize" type="range" min="50" max="150" value="50" class="slider" onchange="render();">
 		</div>
 		<br>
 		<input type="checkbox" id="whiteBg">White Background</input>

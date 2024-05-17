@@ -10,6 +10,18 @@
 	<head>
 		<link rel="stylesheet" type="text/css" href="../../../style.css">
 		<link rel="stylesheet" type="text/css" href="style.css">
+		<style>
+			#glyphActions {
+				position: fixed;
+				pointer-events: none;
+
+				-webkit-user-select: none;  /* chrome, safari, opera */
+				-khtml-user-select: none;   /* konqueror (tf is that ?) */
+				-moz-user-select: none;     /* firefox */
+				-ms-user-select: none;      /* IE, edge */
+				user-select: none;          /* unprefixed (few browsers) */
+			}
+		</style>
 	</head>
 
 	<body>
@@ -39,6 +51,8 @@
 		<div id="controlDot1" class="controlDots" style="background-color: #ffffff;"> </div>
 		<div id="controlDot2" class="controlDots" style="background-color: #707070;"> </div>
 		<div id="controlDot3" class="controlDots" style="background-color: #ff0000;"> </div>
+
+		<img class="glyphActions" id="deleteGlyph" src="../whole/deleteGlyph.png" style="display: none; position: fixed; cursor: pointer;"/>
 	</body>
 
 	<script src="../../../ToolVersion.js"></script>

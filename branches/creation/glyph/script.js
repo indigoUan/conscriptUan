@@ -8,6 +8,20 @@ let showGrid = true;
 let cruveCanvases = [];
 let curves = [];
 
+let hoveringId = -1;
+document.getElementById("deleteGlyph").addEventListener("click", function(e) {
+	if (hoveringId > -1) {
+		if (curves[selectedLine]) {
+			curves[selectedLine].deactivate();
+		}
+		selectedLine = -1;
+
+		curves.splice(hoveringId, 1);
+		hoveringId = -1;
+		dirtify();
+	}
+});
+
 function drawGrid(canvas, ctx) {
 	if (!showGrid) return;
 
@@ -395,7 +409,12 @@ document.addEventListener("visibilitychange", (event) => {
 	}
 });
 
-redraw();
+let mouse = { x: 0, y: 0 }
+
+document.addEventListener('mousemove', function(e) {
+	mouse.x = e.clientX;
+	mouse.y = e.clientY;
+});
 
 function loop(timestamp) {
 	render();
@@ -403,6 +422,37 @@ function loop(timestamp) {
 		window.scheduledRedraw = false;
 		redraw();
 	}
+
+	hoveringId = -1;
+
+	for (let i = 0; i < parsed.glyphs.length; i++) {
+		const canv = document.getElementById("sortableCanvas" + i);
+		if (canv) {
+			const rect = canv.getBoundingClientRect();
+			if (rect) {
+				if (mouse.x >= rect.left && mouse.x <= rect.left + rect.width && mouse.y >= rect.top && mouse.y <= rect.top + rect.height) {
+					hoveringId = i;
+					break;
+				}
+			}
+		}
+	}
+
+	const deleteGlyph = document.getElementById("deleteGlyph");
+
+	if (hoveringId >= 0) {
+		const canv = document.getElementById("sortableCanvas" + hoveringId);
+
+		deleteGlyph.style.display = "block";
+
+		deleteGlyph.style.left = (canv.getBoundingClientRect().right - deleteGlyph.getBoundingClientRect().width) + "px";
+		deleteGlyph.style.top = (canv.getBoundingClientRect().bottom - deleteGlyph.getBoundingClientRect().height) + "px";
+	} else {
+		deleteGlyph.style.display = "none";
+	}
+
 	requestAnimationFrame(loop);
 }
+
+redraw();
 requestAnimationFrame(loop);

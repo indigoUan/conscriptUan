@@ -19,12 +19,12 @@
 		<br><br>
 		<input type="checkbox" id="gridCheckbox" checked>Show Grid</input>
 		<br><br>
-		<button id="xFlipButton" onclick="flipXorY(0)" style="width: 60px; height: 40px;">Flip X</button>
-		<button id="yFlipButton" onclick="flipXorY(1)" style="width: 60px; height: 40px;">Flip Y</button>
-		<button id="xMoveMoreButton" onclick="moveAll(0, 1)" style="width: 60px; height: 40px; margin-left: 70px;">X + 1</button>
-		<button id="xMoveLessButton" onclick="moveAll(0, -1)" style="width: 60px; height: 40px;">X - 1</button>
-		<button id="yMoveMoreButton" onclick="moveAll(1, 1)" style="width: 60px; height: 40px;">Y + 1</button>
-		<button id="yMoveLessButton" onclick="moveAll(1, -1)" style="width: 60px; height: 40px;">Y - 1</button>
+		<button id="xFlipButton" onclick="flipXorY(0)" style="width: 120px; height: 40px;">Flip Horizontally</button>
+		<button id="yFlipButton" onclick="flipXorY(1)" style="width: 120px; height: 40px;">Flip Vertically</button>
+		<button id="xMoveLessButton" onclick="moveAll(0, -1)" style="margin-left: 70px; width: 100px; height: 40px;">Move Left</button>
+		<button id="xMoveMoreButton" onclick="moveAll(0, 1)" style="width: 100px; height: 40px;">Move Right</button>
+		<button id="yMoveLessButton" onclick="moveAll(1, -1)" style="width: 100px; height: 40px;">Move Up</button>
+		<button id="yMoveMoreButton" onclick="moveAll(1, 1)" style="width: 100px; height: 40px;">Move Down</button>
 		<div id="canvases" style="display: flex; align-items: flex-start; margin-top: 10px; margin-bottom: 10px;">
 			<div>
 			<canvas id="myCanvas" width="700" height="700" style="border:1px solid #ffffff; margin-left: 32px;">

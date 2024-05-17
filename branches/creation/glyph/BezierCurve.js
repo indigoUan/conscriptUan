@@ -73,6 +73,7 @@ class BezierCurve {
 
 			function mouseMoveHandler(e) {
 				window.dirty = true;
+				window.scheduledRedraw = true;
 
 				let clientX = e.clientX, clientY = e.clientY;
 

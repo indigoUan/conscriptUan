@@ -5,7 +5,7 @@ class Redirect {
 		}
 
 		const init = "file:///E:/htmls/conscriptUan";
-		// const init = "C:/Users/Utente/Documents/gioele neri 2apss/conscriptUan-main";
+		// const init = "https://github.com/indigouan/conscriptUan/tree/stable";
 
 		window.location.href = init + "/" + (file.length === 0? "" : (file + "/")) + "index.html" + (extra? extra : "");
 	}

@@ -1,6 +1,7 @@
 const currentToolVersion = "α.0.0";
+const currentCsuVersion = 0;
 
 document.writeln(`
 <div id="label-text">
-	© îndigoUán - 2024 - ver: ${currentToolVersion} - <a href="#" onclick="Redirect.home(); return false;" style="color: #add8e6;">Home</a>
+	© îndigoUán 2024 | ToolVer: ${currentToolVersion} - CsuJsonVer: ${currentCsuVersion} | <a href="#" onclick="Redirect.home();" style="color: #add8e6;">Return to Homepage</a>
 </div>`);

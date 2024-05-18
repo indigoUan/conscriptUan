@@ -144,7 +144,7 @@ function downloadScript() {
 
 	var a = document.createElement("a");
 	a.href = url;
-	a.download = document.getElementById("scriptName").value.toLowerCase().replace(" ", "_") + ".json";
+	a.download = document.getElementById("scriptName").value.toLowerCase().replace(" ", "_") + ".v" + currentCsuVersion + ".json";
 	a.style.display = "none";
 
 	document.body.appendChild(a);

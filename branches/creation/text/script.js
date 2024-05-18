@@ -115,23 +115,24 @@ function render() {
 				}
 			}
 		} else {
-			let X = order === "rltd"? canvas.width : 0;
-			let Y = 0;
+			let X = order === "rltd"? canvas.width - (charSize / 50 * 5) : (charSize / 50 * 5);
+			let Y = (charSize / 50 * 5);
 
-			function drawChar(name) {
+			function drawChar(name, xOffset, yOffset) {
 				const glyph = seek(name);
 				if (glyph) {
+					const gridPart = charSize / (glyph.grid - 1);
 					for (let curve of glyph.curves) {
 						ctx.lineCap = "round";
 						ctx.beginPath();
 						ctx.lineWidth = curve.thickness * charSize;
 
-						ctx.moveTo(curve.origin[0] / (glyph.grid - 1) * charSize + X, curve.origin[1] / (glyph.grid - 1) * charSize + Y);
+						ctx.moveTo(curve.origin[0] / (glyph.grid - 1) * charSize + X - (xOffset * gridPart), curve.origin[1] / (glyph.grid - 1) * charSize + Y - (yOffset * gridPart));
 
 						ctx.bezierCurveTo(
-							curve.controlPoint1[0] / (glyph.grid - 1) * charSize + X, curve.controlPoint1[1] / (glyph.grid - 1) * charSize + Y,
-							curve.controlPoint2[0] / (glyph.grid - 1) * charSize + X, curve.controlPoint2[1] / (glyph.grid - 1) * charSize + Y,
-							curve.end[0] / (glyph.grid - 1) * charSize + X, curve.end[1] / (glyph.grid - 1) * charSize + Y
+							curve.controlPoint1[0] / (glyph.grid - 1) * charSize + X - (xOffset * gridPart), curve.controlPoint1[1] / (glyph.grid - 1) * charSize + Y - (yOffset * gridPart),
+							curve.controlPoint2[0] / (glyph.grid - 1) * charSize + X - (xOffset * gridPart), curve.controlPoint2[1] / (glyph.grid - 1) * charSize + Y - (yOffset * gridPart),
+							curve.end[0] / (glyph.grid - 1) * charSize + X - (xOffset * gridPart), curve.end[1] / (glyph.grid - 1) * charSize + Y - (yOffset * gridPart)
 						);
 
 						ctx.stroke();
@@ -190,27 +191,38 @@ function render() {
 					for (const char of line) {
 						const glyph = seek(char);
 						const rect = glyphRect(glyph);
+						const gridPart = charSize / (glyph.grid - 1);
 
 						if (order === "lrtd") {
-							X -= rect.x - 1;
-							Y -= rect.y + 1;
-							drawChar(char);
-							X += rect.x + (rect.width + 1) * (charSize / (glyph.grid - 1));
-							Y += rect.y + 1;
-							yAdd = Math.max(yAdd, rect.height * (charSize / (glyph.grid - 1)));
+							drawChar(char, rect.x, rect.y);
+							X += rect.x + (rect.width) * gridPart + (charSize / 15);
+							yAdd = Math.max(yAdd, rect.height * gridPart);
 						}
 						if (order === "rltd") {
-							X -= (rect.width + 1) * (charSize / (glyph.grid - 1)) + 1;
-							Y -= rect.y + 1;
-							drawChar(char);
-							Y += rect.y + 1;
-							yAdd = Math.max(yAdd, rect.height * (charSize / (glyph.grid - 1)));
+							X -= (rect.width) * gridPart + (charSize / 15);
+							drawChar(char, rect.x, rect.y);
+							yAdd = Math.max(yAdd, rect.height * gridPart);
 						}
 					}
 					X = ogX;
 					Y += yAdd;
 				}
 			} else {
+				const ogY = Y;
+				for (const line of lineArray) {
+					let xAdd = 0;
+					for (const char of line) {
+						const glyph = seek(char);
+						const rect = glyphRect(glyph);
+						const gridPart = charSize / (glyph.grid - 1);
+
+						drawChar(char, rect.x, rect.y);
+						Y += rect.y + (rect.height) * gridPart + (charSize / 15);
+						xAdd = Math.max(xAdd, rect.height * gridPart);
+					}
+					Y = ogY;
+					X += xAdd;
+				}
 			}
 		}
 	}

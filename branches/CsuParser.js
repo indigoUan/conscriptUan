@@ -8,7 +8,7 @@ class CsuParser {
 		const json = JSON.parse(csu);
 
 		switch (json.version) {
-			case "α.0.0": {
+			case 0: {
 				this.glyphs = new Array();
 				if (json.name) {
 					this.name = json.name;
@@ -56,7 +56,7 @@ class CsuParser {
 	toString() {
 		let json = {
 			name: this.name,
-			version: currentToolVersion,
+			version: currentCsuVersion,
 			glyphs: new Array()
 		}
 

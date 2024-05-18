@@ -5,7 +5,7 @@ class Redirect {
 		}
 
 		// const init = "file:///E:/htmls/conscriptUan";
-		const init = "https://indigouan.github.io/conscriptUan/";
+		const init = "https://indigouan.github.io/conscriptUan";
 
 		window.location.href = init + "/" + (file.length === 0? "" : (file + "/")) + "index.html" + (extra? extra : "");
 	}

@@ -244,6 +244,13 @@ let parsed = undefined;
 			console.log(event.target.value);
 			parsed.glyphs[editingParsedIndex].name = event.target.value;
 		});
+
+		const sizeDiv = document.getElementById("gridResolution");
+		sizeDiv.value = parsed.glyphs[editingParsedIndex].grid;
+		sizeDiv.addEventListener("change", (event) => {
+			event.target.value = event.target.value < 3? 3 : (event.target.value > 21? 21 : event.target.value);
+			window.gridResolution = event.target.value;
+		});
 	}
 }
 
@@ -274,20 +281,13 @@ document.addEventListener("keydown", function(event) {
 			curves[selectedLine].thickness = Math.min(curves[selectedLine].thickness + 0.01, 1);
 		}
 	}
-
-	if (event.key === "Enter") {
-		saveAndReturn();
-	}
-
-	if (event.key === "Escape") {
-		cancelAndReturn();
-	}
 });
 
 function saveAndReturn() {
 	if (parsed !== null && editingParsedIndex !== null) {
 		window.dirty = false;
 
+		parsed.glyphs[editingParsedIndex].grid = window.gridResolution;
 		parsed.glyphs[editingParsedIndex].curves = new Array();
 		for (let curve of curves) {
 			parsed.glyphs[editingParsedIndex].curves.push({

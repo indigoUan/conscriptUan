@@ -29,8 +29,11 @@
 		<button id="finishButton" onclick="saveAndReturn()" style="width: 80px; height: 30px;">Finish</button>
 		<button id="cancelButton" onclick="cancelAndReturn()" style="width: 80px; height: 30px;">Cancel</button>
 		<br><br>
-		<input type="checkbox" id="gridCheckbox" checked>Show Grid</input>
-		<br><br>
+		<div id="gridSettings" style="display: flex; align-items: flex-start;">
+			<p>Grid:</p>
+			<input type="checkbox" id="gridCheckbox" checked style="margin-top: 20px;"></input>
+			<input type="number" id="gridResolution" name="gridResolution" min="3" max="21" value="15" style="margin-top: 17px;">
+		</div>
 		<button id="xFlipButton" onclick="flipXorY(0)" style="width: 120px; height: 40px;">Flip Horizontally</button>
 		<button id="yFlipButton" onclick="flipXorY(1)" style="width: 120px; height: 40px;">Flip Vertically</button>
 		<button id="xMoveLessButton" onclick="moveAll(0, -1)" style="margin-left: 70px; width: 100px; height: 40px;">Move Left</button>

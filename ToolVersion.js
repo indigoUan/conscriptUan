@@ -1,4 +1,4 @@
-const currentToolVersion = "α.0.0";
+const currentToolVersion = "α.0.1";
 const currentCsuVersion = 0;
 
 document.writeln(`

@@ -4,11 +4,12 @@ class Redirect {
 			throw "`extra` too long!";
 		}
 
-		// const init = "file:///E:/htmls/conscriptUan";
-		const init = "https://indigouan.github.io/conscriptUan";
-
-		// window.location.href = init + "/" + (file.length === 0? "" : (file + "/")) + "index.html" + (extra? extra : "");
-		window.location.href = init + "/" + (file.length === 0? "" : (file + "/")) + (extra? extra : "");
+		const devMode = false;
+		if (devMode) {
+			window.location.href = "file:///E:/htmls/conscriptUan/" + (file.length === 0? "" : (file + "/")) + "index.html" + (extra? extra : "");
+		} else {
+			window.location.href = "https://indigouan.github.io/conscriptUan/" + (file.length === 0? "" : (file + "/")) + (extra? extra : "");
+		}
 	}
 
 	static home() {

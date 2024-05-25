@@ -4,7 +4,7 @@ class Redirect {
 			throw "`extra` too long!";
 		}
 
-		const devMode = true;
+		const devMode = false;
 		if (devMode) {
 			window.location.href = "file:///E:/htmls/conscriptUan/" + (file.length === 0? "" : (file + "/")) + "index.html" + (extra? extra : "");
 		} else {

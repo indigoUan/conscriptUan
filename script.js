@@ -10,7 +10,7 @@ function loadScript() {
 
 		reader.onload = function(event) {
 			loadedFile = event.target.result;
-			sessionStorage.setItem("loadedFile", loadedFile);
+			sessionStorage.setItem("loadedFile", new CsuParser(loadedFile).toString());
 			Redirect.open("branches/creation/whole");
 		};
 

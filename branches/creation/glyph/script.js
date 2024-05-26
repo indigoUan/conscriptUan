@@ -73,7 +73,6 @@ function redraw() {
 		}
 		selectedLine = -1;
 	});
-	document.getElementById("sortableCanvases").appendChild(deselect);
 
 	var ctx = deselect.getContext("2d");
 	{
@@ -113,19 +112,88 @@ function redraw() {
 	newCurve.id = "subcanvasAdd";
 	newCurve.width = newCurve.height = "100";
 	newCurve.style = "margin-left: 20px; margin-top: 20px; margin-bottom: 20px; cursor: pointer;";
-	document.getElementById("sortableCanvases").appendChild(newCurve);
 
 	newCurve.addEventListener("click", function(e) {
-		var curve = new BezierCurve();
-		if (curves[selectedLine]) {
-			curves[selectedLine].deactivate();
-		}
-		curves.push(curve);
-		selectedLine = curves.length - 1;
-		curves[selectedLine].activate();
-		dirtify();
+		let canCloseByPressingElsewhere = true;
 
-		document.getElementById("sortableCanvases").appendChild(newCurve);
+		var overlay = document.createElement("div");
+		overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center";
+		overlay.onclick = function() {
+			if (canCloseByPressingElsewhere) {
+				try {
+					document.body.removeChild(overlay);
+				} catch (e) {
+					// ignore lol 
+				}
+			}
+		};
+		document.body.appendChild(overlay);
+
+		var button1 = document.createElement("button");
+		button1.innerText = "Add Curve";
+		button1.style = `position: absolute; left: ${e.clientX - 85}px; top: ${e.clientY - 24}px`;
+
+		button1.onclick = function() {
+			var curve = new BezierCurve();
+			if (curves[selectedLine]) {
+				curves[selectedLine].deactivate();
+			}
+			curves.push(curve);
+			selectedLine = curves.length - 1;
+			curves[selectedLine].activate();
+			dirtify();
+
+			document.body.removeChild(overlay);
+		};
+		overlay.appendChild(button1);
+
+		var button2 = document.createElement("button");
+		button2.innerText = "Add Glyph";
+		button2.style = `position: absolute; left: ${e.clientX - 85}px; top: ${e.clientY + 4}px`;
+
+		button2.onclick = function() {
+			canCloseByPressingElsewhere = false;
+
+			overlay.removeChild(button1);
+			overlay.removeChild(button2);
+
+			var inputDiv = document.createElement("div");
+			inputDiv.style = `position: absolute; left: ${e.clientX - 110}px; top: ${e.clientY + 4}px`;
+
+			var cancelButton = document.createElement("button");
+			cancelButton.innerText = "Cancel";
+			cancelButton.onclick = function() {
+				document.body.removeChild(overlay);
+			};
+			inputDiv.appendChild(cancelButton);
+	
+			var textField = document.createElement("input");
+			textField.type = "text";
+			textField.placeholder = "Enter glyph name";
+			inputDiv.appendChild(textField);
+
+			var submitButton = document.createElement("button");
+			submitButton.innerText = "Add";
+			submitButton.onclick = function() {
+				var part = new GlyphPart(textField.value);
+				if (part.curves.length > 0) {
+					if (curves[selectedLine]) {
+						curves[selectedLine].deactivate();
+					}
+					curves.push(part);
+					selectedLine = curves.length - 1;
+					curves[selectedLine].activate();
+					dirtify();
+				}
+
+				document.body.removeChild(overlay);
+			};
+			inputDiv.appendChild(submitButton);
+
+			overlay.appendChild(inputDiv);
+		};
+		
+		overlay.appendChild(button2);
 	});
 
 	var ctx = newCurve.getContext("2d");
@@ -183,17 +251,32 @@ function redraw() {
 		ctx.lineWidth = 100 * curves[i].thickness;
 
 		const stepX = 100 / (window.gridResolution - 1);
-		const stepY = 100 / (window.gridResolution - 1);
+		const stepY = stepX;
 
-		ctx.beginPath();
+		if (curves[i].classe === "curve") {
+			ctx.beginPath();
 
-		ctx.moveTo(curves[i].originPoint.x * stepX, curves[i].originPoint.y * stepY);
-		ctx.bezierCurveTo(curves[i].controlPoint1.x * stepX, curves[i].controlPoint1.y * stepY,
-			curves[i].controlPoint2.x * stepX, curves[i].controlPoint2.y * stepY,
-			curves[i].endPoint.x * stepX, curves[i].endPoint.y * stepY);
+			ctx.moveTo(curves[i].originPoint.x * stepX, curves[i].originPoint.y * stepY);
+			ctx.bezierCurveTo(curves[i].controlPoint1.x * stepX, curves[i].controlPoint1.y * stepY,
+				curves[i].controlPoint2.x * stepX, curves[i].controlPoint2.y * stepY,
+				curves[i].endPoint.x * stepX, curves[i].endPoint.y * stepY);
 
-		ctx.stroke();
-		ctx.closePath();
+			ctx.stroke();
+			ctx.closePath();
+		} else if (curves[i].classe === "part") {
+			for (const curve of curves[i].curves) {
+				ctx.beginPath();
+
+				ctx.lineWidth = 100 * curve.thickness;
+				ctx.moveTo(curve.origin[0] * stepX, curve.origin[1] * stepY);
+				ctx.bezierCurveTo(curve.controlPoint1[0] * stepX, curve.controlPoint1[1] * stepY,
+					curve.controlPoint2[0] * stepX, curve.controlPoint2[1] * stepY,
+					curve.end[0] * stepX, curve.end[1] * stepY);
+
+				ctx.stroke();
+				ctx.closePath();
+			}
+		}
 
 		document.getElementById("sortableCanvases").appendChild(selectable);
 	}
@@ -230,17 +313,28 @@ let parsed = undefined;
 		editingParsedIndex = parseInt(params.get("loaded"));
 		console.log(editingParsedIndex, parsed.glyphs[editingParsedIndex]);
 
+		console.log(parsed.glyphs[editingParsedIndex].curves, parsed.glyphs[editingParsedIndex].parts);
+
 		window.gridResolution = parsed.glyphs[editingParsedIndex].grid;
-		for (let curve of parsed.glyphs[editingParsedIndex].curves) {
-			let cur = new BezierCurve();
-			cur.thickness = curve.thickness;
-			cur.setGriddedPoints(curve.origin, curve.controlPoint1, curve.controlPoint2, curve.end);
-			curves.push(cur);
+		if (parsed.glyphs[editingParsedIndex].parts) {
+			for (let part of parsed.glyphs[editingParsedIndex].parts) {
+				console.log(part.name);
+				curves.push(new GlyphPart(part.name));
+			}
+		}
+		if (parsed.glyphs[editingParsedIndex].curves) {
+			for (let curve of parsed.glyphs[editingParsedIndex].curves) {
+				let cur = new BezierCurve();
+				cur.thickness = curve.thickness;
+				cur.setGriddedPoints(curve.origin, curve.controlPoint1, curve.controlPoint2, curve.end);
+				curves.push(cur);
+			}
 		}
 
 		const nameDiv = document.getElementById("glyphName");
 		nameDiv.value = parsed.glyphs[editingParsedIndex].name;
 		nameDiv.addEventListener("change", (event) => {
+			dirtify();
 			console.log(event.target.value);
 			parsed.glyphs[editingParsedIndex].name = event.target.value;
 		});
@@ -248,7 +342,8 @@ let parsed = undefined;
 		const sizeDiv = document.getElementById("gridResolution");
 		sizeDiv.value = parsed.glyphs[editingParsedIndex].grid;
 		sizeDiv.addEventListener("change", (event) => {
-			event.target.value = event.target.value < 3? 3 : (event.target.value > 21? 21 : event.target.value);
+			dirtify();
+			event.target.value = event.target.value < 3? 3 : (event.target.value > 31? 31 : event.target.value);
 			window.gridResolution = event.target.value;
 		});
 	}
@@ -283,25 +378,52 @@ document.addEventListener("keydown", function(event) {
 	}
 });
 
+function checkDeletion() {
+	let shouldDelete = true;
+	if (parsed.glyphs[editingParsedIndex].curves) {
+		if (parsed.glyphs[editingParsedIndex].curves.length > 0) {
+			shouldDelete = false;
+		}
+	}
+	if (parsed.glyphs[editingParsedIndex].parts) {
+		if (parsed.glyphs[editingParsedIndex].parts.length > 0) {
+			shouldDelete = false;
+		}
+	}
+	return shouldDelete;
+}
+
 function saveAndReturn() {
 	if (parsed !== null && editingParsedIndex !== null) {
 		window.dirty = false;
 
 		parsed.glyphs[editingParsedIndex].grid = window.gridResolution;
 		parsed.glyphs[editingParsedIndex].curves = new Array();
+		parsed.glyphs[editingParsedIndex].parts = new Array();
+		console.log(parsed.glyphs[editingParsedIndex].curves, parsed.glyphs[editingParsedIndex].parts);
+
 		for (let curve of curves) {
-			parsed.glyphs[editingParsedIndex].curves.push({
-				thickness: curve.thickness,
-				origin: [ curve.originPoint.x, curve.originPoint.y ],
-				controlPoint1: [ curve.controlPoint1.x, curve.controlPoint1.y ],
-				controlPoint2: [ curve.controlPoint2.x, curve.controlPoint2.y ],
-				end: [ curve.endPoint.x, curve.endPoint.y ]
-			});
+			if (curve.classe === "curve") {
+				parsed.glyphs[editingParsedIndex].curves.push({
+					thickness: curve.thickness,
+					origin: [ curve.originPoint.x, curve.originPoint.y ],
+					controlPoint1: [ curve.controlPoint1.x, curve.controlPoint1.y ],
+					controlPoint2: [ curve.controlPoint2.x, curve.controlPoint2.y ],
+					end: [ curve.endPoint.x, curve.endPoint.y ]
+				});
+			}
+			if (curve.classe === "part") {
+				parsed.glyphs[editingParsedIndex].parts.push({
+					name: curve.name,
+					x: 0,
+					y: 0
+				});
+			}
 		}
-		if (parsed.glyphs[editingParsedIndex].curves.length === 0) {
+		console.log(parsed.glyphs[editingParsedIndex].curves, parsed.glyphs[editingParsedIndex].parts);
+
+		if (checkDeletion()) {
 			parsed.glyphs.splice(editingParsedIndex, 1);
-		} else {
-			console.log(parsed.glyphs[editingParsedIndex].curves);
 		}
 
 		sessionStorage.setItem("loadedFile", parsed.toString());
@@ -315,14 +437,11 @@ function cancelAndReturn() {
 	if (parsed !== null && editingParsedIndex !== null) {
 		window.dirty = false;
 
-		console.log(parsed.glyphs[editingParsedIndex].curves);
-		if (parsed.glyphs[editingParsedIndex].curves.length === 0) {
+		if (checkDeletion()) {
 			parsed.glyphs.splice(editingParsedIndex, 1);
-			sessionStorage.setItem("loadedFile", parsed.toString());
-		} else {
-			console.log(parsed.glyphs[editingParsedIndex].curves);
 		}
 
+		sessionStorage.setItem("loadedFile", parsed.toString());
 		Redirect.open("branches/creation/whole");
 	} else {
 		alert("You loaded this page without a glyph.");
@@ -345,7 +464,7 @@ function flipXorY(axis) {
 		}
 	}
 
-	for (let curve of curves) {
+	function runBy(curve) {
 		if (axis === 0) {
 			curve.originPoint.x = window.gridResolution - curve.originPoint.x - 1;
 			curve.controlPoint1.x = window.gridResolution - curve.controlPoint1.x - 1;
@@ -357,6 +476,16 @@ function flipXorY(axis) {
 			curve.controlPoint2.y = window.gridResolution - curve.controlPoint2.y - 1;
 			curve.endPoint.y = window.gridResolution - curve.endPoint.y - 1;
 		}
+	}
+
+	if (selectedLine === -1) {
+		for (let curve of curves) {
+			if (curve.classe === "curve") {
+				runBy(curve);
+			}
+		}
+	} else if (curves[selectedLine].classe === "curve") {
+		runBy(curves[selectedLine]);
 	}
 
 	if (selectedLine > -1) {
@@ -375,7 +504,7 @@ function moveAll(axis, value) {
 		}
 	}
 
-	for (let curve of curves) {
+	function runBy(curve) {
 		if (axis === 0) {
 			curve.originPoint.x += value;
 			curve.controlPoint1.x += value;
@@ -387,6 +516,16 @@ function moveAll(axis, value) {
 			curve.controlPoint2.y += value;
 			curve.endPoint.y += value;
 		}
+	}
+
+	if (selectedLine === -1) {
+		for (let curve of curves) {
+			if (curve.classe === "curve") {
+				runBy(curve);
+			}
+		}
+	} else if (curves[selectedLine].classe === "curve") {
+		runBy(curves[selectedLine]);
 	}
 
 	if (selectedLine > -1) {

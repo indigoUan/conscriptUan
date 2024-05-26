@@ -47,20 +47,17 @@ function reload() {
 
 		const ctx = newCanv.getContext("2d");
 		ctx.lineCap = "round";
-		for (let curve of glyph.curves) {
-			const rect = newCanv.getBoundingClientRect();
-			const stepX = rect.width / (glyph.grid - 1);
-			const stepY = rect.height / (glyph.grid - 1);
-
+		const curves = CsuParser.glyphToCurves(glyph.name, 100, 100);
+		for (let curve of curves) {
 			ctx.beginPath();
-			ctx.lineWidth = curve.thickness * 100;
+			ctx.lineWidth = curve.thickness;
 
-			ctx.moveTo(curve.origin[0] * stepX, curve.origin[1] * stepY);
+			ctx.moveTo(curve.origin[0], curve.origin[1]);
 
 			ctx.bezierCurveTo(
-				curve.controlPoint1[0] * stepX, curve.controlPoint1[1] * stepY,
-				curve.controlPoint2[0] * stepX, curve.controlPoint2[1] * stepY,
-				curve.end[0] * stepX, curve.end[1] * stepY
+				curve.controlPoint1[0], curve.controlPoint1[1],
+				curve.controlPoint2[0], curve.controlPoint2[1],
+				curve.end[0], curve.end[1]
 			);
 
 			ctx.stroke();
@@ -138,7 +135,7 @@ function reload() {
 }
 
 function downloadScript() {
-	var blob = new Blob([parsed.toString()], {type: "text/plain"});
+	var blob = new Blob([parsed.toString(true)], {type: "text/plain"});
 
 	var url = URL.createObjectURL(blob);
 

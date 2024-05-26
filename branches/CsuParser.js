@@ -2,7 +2,7 @@
 
 class CsuParser {
 	constructor(csu) {
-		this.glyphs = [];
+		this.glyphs = new Array();
 		this.name = "Unnamed Script";
 
 		const json = JSON.parse(csu);
@@ -18,11 +18,10 @@ class CsuParser {
 					const newGlyph = {
 						name: glyph.name,
 						grid: glyph.grid,
-						curves: undefined,
-						parts: undefined
+						curves: new Array(),
+						parts: new Array()
 					}
 					if (glyph.parts) {
-						newGlyph.parts = new Array();
 						for (let i = 0; i < glyph.parts.length; i += 3) {
 							newGlyph.parts.push({
 								name: glyph.parts[i],
@@ -30,8 +29,8 @@ class CsuParser {
 								y: glyph.parts[i + 2]
 							});
 						}
-					} else {
-						newGlyph.curves = new Array();
+					}
+					if (glyph.curves) {
 						if (glyph.curves) {
 							for (let i = 0; i < glyph.curves.length; i += 9) {
 								newGlyph.curves.push({
@@ -53,7 +52,7 @@ class CsuParser {
 		}
 	}
 
-	toString() {
+	toString(beautiful = false) {
 		let json = {
 			name: this.name,
 			version: currentCsuVersion,
@@ -64,18 +63,17 @@ class CsuParser {
 			const newGlyph = {
 				name: glyph.name,
 				grid: glyph.grid,
-				curves: undefined,
-				parts: undefined
+				curves: new Array(),
+				parts: new Array()
 			}
 			if (glyph.parts) {
-				newGlyph.parts = new Array();
 				for (let part of glyph.parts) {
 					newGlyph.parts.push(part.name);
 					newGlyph.parts.push(part.x);
 					newGlyph.parts.push(part.y);
 				}
-			} else {
-				newGlyph.curves = new Array();
+			}
+			if (glyph.curves) {
 				if (glyph.curves) {
 					for (let curve of glyph.curves) {
 						newGlyph.curves.push(curve.thickness);
@@ -94,9 +92,72 @@ class CsuParser {
 		}
 
 		console.log(json);
+		if (beautiful) {
+			return JSON.stringify(json, null, "\t");
+		}
 		return JSON.stringify(json);
 		// return JSON.stringify(json, null, "\t");
 		// return QlJson.build(json);
+	}
+
+
+	static glyphToCurves(glyphName, canvasWidth = 1, canvasHeight = 1) {
+		const parsed = new CsuParser(sessionStorage.getItem("loadedFile"));
+		const curves = new Array();
+		let glyph = undefined;
+
+		for (const gl of parsed.glyphs) {
+			if (gl.name === glyphName) {
+				glyph = gl;
+				break;
+			}
+		}
+
+		if (glyph) {
+			const stepX = canvasWidth / (glyph.grid - 1);
+			const stepY = canvasHeight / (glyph.grid - 1);
+			const avg = (canvasWidth + canvasHeight) * 0.5;
+
+			if (glyph.parts) {
+				for (let i = 0; i < glyph.parts.length; i++) {
+					if (glyph.parts[i]) {
+						let gliph = undefined;
+						for (const gl of parsed.glyphs) {
+							if (gl.name === glyph.parts[i].name) {
+								gliph = gl;
+								break;
+							}
+						}
+						if (gliph) {
+							for (let j = 0; j < gliph.curves.length; j++) {
+								const glyf = gliph.curves[j];
+								curves.push({
+									thickness: glyf.thickness * avg,
+									origin: [ glyf.origin[0] * stepX, glyf.origin[1] * stepY ],
+									controlPoint1: [ glyf.controlPoint1[0] * stepX, glyf.controlPoint1[1] * stepY ],
+									controlPoint2: [ glyf.controlPoint2[0] * stepX, glyf.controlPoint2[1] * stepY ],
+									end: [ glyf.end[0] * stepX, glyf.end[1] * stepY ]
+								});
+							}
+						}
+					}
+				}
+			}
+			if (glyph.curves) {
+				for (let i = 0; i < glyph.curves.length; i++) {
+					const glyf = glyph.curves[i];
+					curves.push({
+						thickness: glyf.thickness * avg,
+						origin: [ glyf.origin[0] * stepX, glyf.origin[1] * stepY ],
+						controlPoint1: [ glyf.controlPoint1[0] * stepX, glyf.controlPoint1[1] * stepY ],
+						controlPoint2: [ glyf.controlPoint2[0] * stepX, glyf.controlPoint2[1] * stepY ],
+						end: [ glyf.end[0] * stepX, glyf.end[1] * stepY ]
+					});
+				}
+			}
+		}
+
+		return curves;
 	}
 }
 

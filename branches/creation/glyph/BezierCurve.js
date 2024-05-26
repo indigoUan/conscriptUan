@@ -1,5 +1,7 @@
 class BezierCurve {
 	constructor() {
+		this.classe = "curve";
+
 		this.dragHandlers = new Array(4);
 		const dots = document.getElementsByClassName("controlDots");
 		for (let i = 0; i < dots.length; i++) {

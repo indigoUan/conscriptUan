@@ -168,6 +168,7 @@ function redraw() {
 			inputDiv.appendChild(cancelButton);
 	
 			var textField = document.createElement("input");
+			textField.spellcheck = false;
 			textField.type = "text";
 			textField.placeholder = "Enter glyph name";
 			inputDiv.appendChild(textField);
@@ -175,7 +176,7 @@ function redraw() {
 			var submitButton = document.createElement("button");
 			submitButton.innerText = "Add";
 			submitButton.onclick = function() {
-				var part = new GlyphPart(textField.value);
+				var part = new GlyphPart(textField.value, 0, 0);
 				if (part.curves.length > 0) {
 					if (curves[selectedLine]) {
 						curves[selectedLine].deactivate();
@@ -263,15 +264,16 @@ function redraw() {
 
 			ctx.stroke();
 			ctx.closePath();
-		} else if (curves[i].classe === "part") {
+		}
+		if (curves[i].classe === "part" && curves[i].glyphRectangle) {
 			for (const curve of curves[i].curves) {
 				ctx.beginPath();
 
 				ctx.lineWidth = 100 * curve.thickness;
-				ctx.moveTo(curve.origin[0] * stepX, curve.origin[1] * stepY);
-				ctx.bezierCurveTo(curve.controlPoint1[0] * stepX, curve.controlPoint1[1] * stepY,
-					curve.controlPoint2[0] * stepX, curve.controlPoint2[1] * stepY,
-					curve.end[0] * stepX, curve.end[1] * stepY);
+				ctx.moveTo((curve.origin[0] - curves[i].glyphRectangle.x + curves[i].x) * stepX, (curve.origin[1] - curves[i].glyphRectangle.y + curves[i].y) * stepY);
+				ctx.bezierCurveTo((curve.controlPoint1[0] - curves[i].glyphRectangle.x + curves[i].x) * stepX, (curve.controlPoint1[1] - curves[i].glyphRectangle.y + curves[i].y) * stepY,
+					(curve.controlPoint2[0] - curves[i].glyphRectangle.x + curves[i].x) * stepX, (curve.controlPoint2[1] - curves[i].glyphRectangle.y + curves[i].y) * stepY,
+					(curve.end[0] - curves[i].glyphRectangle.x + curves[i].x) * stepX, (curve.end[1] - curves[i].glyphRectangle.y + curves[i].y) * stepY);
 
 				ctx.stroke();
 				ctx.closePath();
@@ -319,7 +321,7 @@ let parsed = undefined;
 		if (parsed.glyphs[editingParsedIndex].parts) {
 			for (let part of parsed.glyphs[editingParsedIndex].parts) {
 				console.log(part.name);
-				curves.push(new GlyphPart(part.name));
+				curves.push(new GlyphPart(part.name, part.x, part.y));
 			}
 		}
 		if (parsed.glyphs[editingParsedIndex].curves) {
@@ -415,8 +417,8 @@ function saveAndReturn() {
 			if (curve.classe === "part") {
 				parsed.glyphs[editingParsedIndex].parts.push({
 					name: curve.name,
-					x: 0,
-					y: 0
+					x: curve.x,
+					y: curve.y
 				});
 			}
 		}
@@ -465,26 +467,35 @@ function flipXorY(axis) {
 	}
 
 	function runBy(curve) {
-		if (axis === 0) {
-			curve.originPoint.x = window.gridResolution - curve.originPoint.x - 1;
-			curve.controlPoint1.x = window.gridResolution - curve.controlPoint1.x - 1;
-			curve.controlPoint2.x = window.gridResolution - curve.controlPoint2.x - 1;
-			curve.endPoint.x = window.gridResolution - curve.endPoint.x - 1;
-		} else {
-			curve.originPoint.y = window.gridResolution - curve.originPoint.y - 1;
-			curve.controlPoint1.y = window.gridResolution - curve.controlPoint1.y - 1;
-			curve.controlPoint2.y = window.gridResolution - curve.controlPoint2.y - 1;
-			curve.endPoint.y = window.gridResolution - curve.endPoint.y - 1;
+		if (curve.classe === "curve") {
+			if (axis === 0) {
+				curve.originPoint.x = window.gridResolution - curve.originPoint.x - 1;
+				curve.controlPoint1.x = window.gridResolution - curve.controlPoint1.x - 1;
+				curve.controlPoint2.x = window.gridResolution - curve.controlPoint2.x - 1;
+				curve.endPoint.x = window.gridResolution - curve.endPoint.x - 1;
+			} else {
+				curve.originPoint.y = window.gridResolution - curve.originPoint.y - 1;
+				curve.controlPoint1.y = window.gridResolution - curve.controlPoint1.y - 1;
+				curve.controlPoint2.y = window.gridResolution - curve.controlPoint2.y - 1;
+				curve.endPoint.y = window.gridResolution - curve.endPoint.y - 1;
+			}
 		}
+		/*
+		if (curve.classe === "part") {
+			if (axis === 0) {
+				curve.x = window.gridResolution - curve.x - 1;
+			} else {
+				curve.y = window.gridResolution - curve.y - 1;
+			}
+		}
+		*/
 	}
 
 	if (selectedLine === -1) {
 		for (let curve of curves) {
-			if (curve.classe === "curve") {
-				runBy(curve);
-			}
+			runBy(curve);
 		}
-	} else if (curves[selectedLine].classe === "curve") {
+	} else {
 		runBy(curves[selectedLine]);
 	}
 
@@ -505,26 +516,33 @@ function moveAll(axis, value) {
 	}
 
 	function runBy(curve) {
-		if (axis === 0) {
-			curve.originPoint.x += value;
-			curve.controlPoint1.x += value;
-			curve.controlPoint2.x += value;
-			curve.endPoint.x += value;
-		} else {
-			curve.originPoint.y += value;
-			curve.controlPoint1.y += value;
-			curve.controlPoint2.y += value;
-			curve.endPoint.y += value;
+		if (curve.classe === "curve") {
+			if (axis === 0) {
+				curve.originPoint.x += value;
+				curve.controlPoint1.x += value;
+				curve.controlPoint2.x += value;
+				curve.endPoint.x += value;
+			} else {
+				curve.originPoint.y += value;
+				curve.controlPoint1.y += value;
+				curve.controlPoint2.y += value;
+				curve.endPoint.y += value;
+			}
+		}
+		if (curve.classe === "part") {
+			if (axis === 0) {
+				curve.x += value;
+			} else {
+				curve.y += value;
+			}
 		}
 	}
 
 	if (selectedLine === -1) {
 		for (let curve of curves) {
-			if (curve.classe === "curve") {
-				runBy(curve);
-			}
+			runBy(curve);
 		}
-	} else if (curves[selectedLine].classe === "curve") {
+	} else {
 		runBy(curves[selectedLine]);
 	}
 

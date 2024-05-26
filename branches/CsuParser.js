@@ -122,21 +122,26 @@ class CsuParser {
 				for (let i = 0; i < glyph.parts.length; i++) {
 					if (glyph.parts[i]) {
 						let gliph = undefined;
+						let offsetX = 0;
+						let offsetY = 0;
 						for (const gl of parsed.glyphs) {
 							if (gl.name === glyph.parts[i].name) {
 								gliph = gl;
+								if (glyph.parts[i].x) offsetX = glyph.parts[i].x;
+								if (glyph.parts[i].y) offsetY = glyph.parts[i].y;
 								break;
 							}
 						}
 						if (gliph) {
 							for (let j = 0; j < gliph.curves.length; j++) {
 								const glyf = gliph.curves[j];
+								const rect = CsuParser.glyphRect(gliph);
 								curves.push({
 									thickness: glyf.thickness * avg,
-									origin: [ glyf.origin[0] * stepX, glyf.origin[1] * stepY ],
-									controlPoint1: [ glyf.controlPoint1[0] * stepX, glyf.controlPoint1[1] * stepY ],
-									controlPoint2: [ glyf.controlPoint2[0] * stepX, glyf.controlPoint2[1] * stepY ],
-									end: [ glyf.end[0] * stepX, glyf.end[1] * stepY ]
+									origin: [ (glyf.origin[0] - rect.x + offsetX) * stepX, (glyf.origin[1] - rect.y + offsetY) * stepY ],
+									controlPoint1: [ (glyf.controlPoint1[0] - rect.x + offsetX) * stepX, (glyf.controlPoint1[1] - rect.y + offsetY) * stepY ],
+									controlPoint2: [ (glyf.controlPoint2[0] - rect.x + offsetX) * stepX, (glyf.controlPoint2[1] - rect.y + offsetY) * stepY ],
+									end: [ (glyf.end[0] - rect.x + offsetX) * stepX, (glyf.end[1] - rect.y + offsetY) * stepY ]
 								});
 							}
 						}
@@ -158,6 +163,59 @@ class CsuParser {
 		}
 
 		return curves;
+	}
+
+	static glyphRect(glyph) {
+		if (glyph.rect) {
+			return glyph.rect;
+		}
+
+		const rect = {
+			x: glyph.grid - 1,
+			y: glyph.grid - 1,
+			width: 0,
+			height: 0
+		}
+
+		const allLines = new Array();
+		for (const curve of glyph.curves) {
+			allLines.push(curve);
+		}
+		for (const part of glyph.parts) {
+			for (const curve of part.curves) {
+				allLines.push(curve);
+			}
+		}
+
+		for (const curve of allLines) {
+			const points = [curve.origin, curve.controlPoint1, curve.controlPoint2, curve.end];
+			for (const point of points) {
+				if (point[0] < rect.x) {
+					rect.x = point[0];
+				}
+				if (point[1] < rect.y) {
+					rect.y = point[1];
+				}
+			}
+		}
+		for (const curve of glyph.curves) {
+			const points = [curve.origin, curve.controlPoint1, curve.controlPoint2, curve.end];
+			for (const point of points) {
+				if (point[0] - rect.x > rect.width) {
+					rect.width = point[0] - rect.x;
+				}
+				if (point[1] - rect.y > rect.height) {
+					rect.height = point[1] - rect.y;
+				}
+			}
+		}
+
+		return {
+			x: Math.max(rect.x, 0),
+			y: Math.max(rect.y, 0),
+			width: Math.min(rect.width, glyph.grid),
+			height: Math.min(rect.height, glyph.grid)
+		};
 	}
 }
 

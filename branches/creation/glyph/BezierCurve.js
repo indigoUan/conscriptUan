@@ -29,7 +29,6 @@ class BezierCurve {
 
 	makeMouseDownHandler(dot) {
 		const rect = document.getElementById("myCanvas").getBoundingClientRect();
-		const snapMethod = this.snapDot;
 		const self = this;
 
 		return function(e) {
@@ -109,14 +108,6 @@ class BezierCurve {
 			document.addEventListener("mouseup", reset);
 			document.addEventListener("touchmove", mouseMoveHandler);
 			document.addEventListener("touchend", reset);
-		}
-	}
-
-	toggle() {
-		if (this.active) {
-			this.deactivate();
-		} else {
-			this.activate();
 		}
 	}
 
